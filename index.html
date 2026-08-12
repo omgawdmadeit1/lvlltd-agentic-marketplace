@@ -2,55 +2,49 @@
 <html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>LVL — Agentic Marketplace</title>
-<meta name="description" content="Conversation for humans. Machine-speed markets for agents. 3.3% fee."/>
 <meta name="theme-color" content="#0a0a0b"/>
 <link rel="icon" href="/favicon.svg"/>
 <style>
-:root{--bg:#0a0a0b;--fg:#f4f4f5;--m:#a1a1aa;--c:rgba(24,24,27,.82);--b:rgba(255,255,255,.12);--a:#a78bfa;--a2:#38bdf8}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0a0a0b;color:#f4f4f5;font-family:system-ui,sans-serif}
 .bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0a0a0b}
-.bg video,.bg img.poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bg video,.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .bg video{opacity:.55}
-.bg .veil{position:absolute;inset:0;background:
-  radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.28),transparent 50%),
-  radial-gradient(ellipse at 70% 80%,rgba(56,189,248,.18),transparent 45%),
-  linear-gradient(180deg,rgba(10,10,11,.45),rgba(10,10,11,.82) 55%,rgba(10,10,11,.94))}
+.bg .veil{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.28),transparent 50%),linear-gradient(180deg,rgba(10,10,11,.4),rgba(10,10,11,.9))}
 .shell{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column}
 header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
-.brand b{font-size:14px}.brand p{margin:0;font-size:11px;color:var(--m)}
-.bal{border:1px solid var(--b);border-radius:999px;padding:6px 10px;font-size:12px;background:rgba(24,24,27,.75);backdrop-filter:blur(8px)}
+.brand b{font-size:14px}.brand p{margin:0;font-size:11px;color:#a1a1aa}
+.bal{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;background:rgba(24,24,27,.75)}
 .nav{display:flex;gap:6px;padding:0 16px 8px;overflow:auto}
-button{border:1px solid var(--b);background:rgba(24,24,27,.7);color:var(--fg);border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer}
+button{border:1px solid rgba(255,255,255,.12);background:rgba(24,24,27,.7);color:#f4f4f5;border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer}
 .nav button.on{background:linear-gradient(135deg,rgba(167,139,250,.35),rgba(56,189,248,.25))}
 main{flex:1;display:grid;place-items:center;padding:16px}
-.chat{width:min(560px,100%);background:var(--c);border:1px solid var(--b);border-radius:20px;padding:18px;backdrop-filter:blur(16px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
-h1{margin:0 0 6px;font-size:22px;letter-spacing:-.03em}.sub{margin:0 0 14px;color:var(--m);font-size:13px;line-height:1.45}
+.chat{width:min(560px,100%);background:rgba(24,24,27,.82);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;backdrop-filter:blur(16px)}
+h1{margin:0 0 6px;font-size:22px}.sub{margin:0 0 14px;color:#a1a1aa;font-size:13px;line-height:1.45}
 #msgs{display:flex;flex-direction:column;gap:10px;max-height:42vh;overflow:auto;margin-bottom:12px}
-.msg{padding:10px 12px;border-radius:14px;font-size:13px;border:1px solid var(--b);line-height:1.45}
+.msg{padding:10px 12px;border-radius:14px;font-size:13px;border:1px solid rgba(255,255,255,.12)}
 .msg.bot{background:rgba(255,255,255,.05)}.msg.user{background:rgba(167,139,250,.15);align-self:flex-end}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.composer{display:flex;gap:8px}.composer input{flex:1;border-radius:12px;border:1px solid var(--b);background:rgba(0,0,0,.35);color:#fff;padding:10px 12px}
-.panel{position:fixed;inset:0 0 0 auto;width:min(420px,100%);background:rgba(10,10,11,.94);border-left:1px solid var(--b);transform:translateX(100%);transition:.22s;z-index:5;display:flex;flex-direction:column;backdrop-filter:blur(18px)}
-.panel.open{transform:none}.hd{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b)}
+.composer{display:flex;gap:8px}.composer input{flex:1;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:10px 12px}
+.panel{position:fixed;inset:0 0 0 auto;width:min(420px,100%);background:rgba(10,10,11,.94);border-left:1px solid rgba(255,255,255,.12);transform:translateX(100%);transition:.22s;z-index:5;display:flex;flex-direction:column}
+.panel.open{transform:none}.hd{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
 .bd{padding:14px 16px;overflow:auto;flex:1}
-.card{border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.03)}
-.card h3{margin:0 0 4px;font-size:13px}.card p{margin:0;color:var(--m);font-size:12px}
-.row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}.badge{font-size:11px;color:var(--a2)}
-#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid var(--b);padding:10px 14px;border-radius:12px;font-size:12px;opacity:0;transition:.2s;z-index:10}
+.card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;margin-bottom:10px}
+.card h3{margin:0 0 4px;font-size:13px}.card p{margin:0;color:#a1a1aa;font-size:12px}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}.badge{font-size:11px;color:#38bdf8}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;font-size:12px;opacity:0;transition:.2s;z-index:10}
 #toast.show{opacity:1}
-@media (max-width:640px){.chat{border-radius:16px}.panel{width:100%}}
 @media (prefers-reduced-motion:reduce){.bg video{display:none}}
 </style></head><body>
 <div class="bg" aria-hidden="true">
-  <img class="poster" id="poster" src="/media/poster.jpg" alt=""/>
-  <video id="bgv" muted loop playsinline autoplay preload="metadata" poster="/media/poster.jpg">
-    <source src="/media/welcome.mp4" type="video/mp4"/>
-  </video>
-  <div class="veil"></div>
+<img id="poster" src="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg" alt=""/>
+<video id="bgv" muted loop playsinline autoplay preload="metadata" poster="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg">
+<source src="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4" type="video/mp4"/>
+</video>
+<div class="veil"></div>
 </div>
 <div class="shell">
-<header><div style="display:flex;gap:10px;align-items:center"><button id="m" aria-label="Menu">☰</button><div class="brand"><b>LVL</b><p>agentic.lvlltd.com · agentic market</p></div></div><div class="bal" id="bal">250.00 USDC</div></header>
-<nav class="nav" id="nav"><button data-p="markets" class="on">Markets</button><button data-p="skills">Skills</button><button data-p="sell">Sell</button><button data-p="orders">Orders</button><button data-p="agent">Agent API</button></nav>
+<header><div style="display:flex;gap:10px;align-items:center"><button id="m">☰</button><div class="brand"><b>LVL</b><p>agentic.lvlltd.com · agentic market</p></div></div><div class="bal" id="bal">250.00 USDC</div></header>
+<nav class="nav"><button data-p="markets" class="on">Markets</button><button data-p="skills">Skills</button><button data-p="sell">Sell</button><button data-p="orders">Orders</button><button data-p="agent">Agent API</button></nav>
 <main><section class="chat"><h1>Welcome to LVL</h1><p class="sub">Conversation for humans. Machine-speed markets for agents. Platform fee 3.3%.</p><div id="msgs"></div><div class="composer"><input id="in" placeholder="Ask to shop, sell, equip a skill…"/><button id="send">Send</button></div></section></main>
 </div>
 <aside class="panel" id="panel"><div class="hd"><div class="brand"><b id="pt">Markets</b><p>Live market surface</p></div><button id="x">✕</button></div><div class="bd" id="pb"></div></aside>
@@ -59,36 +53,22 @@ h1{margin:0 0 6px;font-size:22px;letter-spacing:-.03em}.sub{margin:0 0 14px;colo
 const S={p:"markets",open:1,auctions:[],skills:[],orders:[],me:null};
 const $=id=>document.getElementById(id);
 const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2800)};
-function add(role,text,acts=[]){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(acts.length){const a=document.createElement("div");a.className="actions";acts.forEach(x=>{const b=document.createElement("button");b.textContent=x.l;b.onclick=()=>go(x.i);a.appendChild(b)});d.appendChild(a)}$("msgs").appendChild(d);$("msgs").scrollTop=1e9}
+function add(role,text,acts=[]){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(acts.length){const a=document.createElement("div");a.className="actions";acts.forEach(x=>{const b=document.createElement("button");b.textContent=x.l;b.onclick=()=>go(x.i);a.appendChild(b)});d.appendChild(a)}$("msgs").appendChild(d)}
 async function api(p,o){const r=await fetch(p,Object.assign({headers:{"content-type":"application/json"}},o||{}));const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.statusText);return j}
 const money=n=>(Number(n)||0).toFixed(2)+" USDC";
 async function refresh(){try{const [A,a,s,o]=await Promise.all([api("/api/agent"),api("/api/auctions?status=open"),api("/api/skills"),api("/api/orders")]);S.me=o.me||null;S.auctions=a.auctions||[];S.skills=s.skills||[];S.orders=o.orders||[];$("bal").textContent=S.me?money(S.me.balance_usdc??S.me.balanceUsdc):money(250);render()}catch(e){toast("API: "+e.message)}}
 function render(){const t=S.p;$("pt").textContent={markets:"Markets",skills:"Skills",sell:"Sell",orders:"Orders",agent:"Agent API"}[t];const pb=$("pb");
-if(t==="markets"){pb.innerHTML=S.auctions.map(a=>`<div class="card"><h3>${a.title||a.listing?.title||a.id}</h3><p>${a.description||""}</p><div class="row"><span class="badge">${a.auction_type||"english"} · high ${money(a.current_high_bid||a.highBidUsdc||0)}</span><button data-bid="${a.id}">Bid</button></div></div>`).join("")||"<p class=sub>No open auctions.</p>";pb.querySelectorAll("[data-bid]").forEach(b=>b.onclick=async()=>{const amt=prompt("Bid USDC");if(!amt)return;try{await api("/api/auctions/"+b.dataset.bid+"/bids",{method:"POST",body:JSON.stringify({amount_usdc:Number(amt)})});toast("Bid placed");refresh()}catch(e){toast(e.message)}})}
+if(t==="markets"){pb.innerHTML=S.auctions.map(a=>`<div class="card"><h3>${a.title||a.id}</h3><p>${a.description||""}</p><div class="row"><span class="badge">${a.auction_type||"english"} · high ${money(a.current_high_bid||a.highBidUsdc||0)}</span><button data-bid="${a.id}">Bid</button></div></div>`).join("")||"<p class=sub>No open auctions.</p>";pb.querySelectorAll("[data-bid]").forEach(b=>b.onclick=async()=>{const amt=prompt("Bid USDC");if(!amt)return;try{await api("/api/auctions/"+b.dataset.bid+"/bids",{method:"POST",body:JSON.stringify({amount_usdc:Number(amt)})});toast("Bid placed");refresh()}catch(e){toast(e.message)}})}
 else if(t==="skills"){pb.innerHTML=S.skills.map(s=>`<div class="card"><h3>${s.name}</h3><p>${s.description||""}</p><div class="row"><span class="badge">${money(s.price_usdc||s.priceUsdc||0)}</span><button data-buy="${s.id}">Purchase</button></div></div>`).join("")||"<p class=sub>No public skills.</p>";pb.querySelectorAll("[data-buy]").forEach(b=>b.onclick=async()=>{try{await api("/api/skills/"+b.dataset.buy+"/purchase",{method:"POST",body:"{}"});toast("Purchased");refresh()}catch(e){toast(e.message)}})}
 else if(t==="sell"){pb.innerHTML=`<div class="card"><h3>Create listing</h3><p>3.3% fee</p><input id="lt" placeholder="Title" style="width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid #333;background:#000;color:#fff"/><input id="lp" placeholder="Price USDC" style="width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid #333;background:#000;color:#fff"/><button id="cl">List</button></div>`;$("cl").onclick=async()=>{try{await api("/api/listings",{method:"POST",body:JSON.stringify({title:$("lt").value.trim(),description:$("lt").value.trim(),type:"digital",pricing_mode:"fixed",price_usdc:Number($("lp").value)})});toast("Listed");refresh()}catch(e){toast(e.message)}}}
 else if(t==="orders"){pb.innerHTML=(S.orders||[]).map(o=>`<div class="card"><h3>${o.kind||"order"} · ${money(o.amount_usdc||o.amountUsdc)}</h3><p>Fee ${money(o.platform_fee_usdc||o.feeUsdc)}</p></div>`).join("")||"<p class=sub>No orders yet.</p>"}
-else{pb.innerHTML=`<div class="card"><h3>Machine surface</h3><p>GET /api/agent · GET /api/actions</p><p>agentic.lvlltd.com · 3.3%</p><button onclick="navigator.clipboard.writeText(location.origin+'/api/agent');toast('Copied')">Copy agent URL</button></div>`}}
-function go(n){S.p=n;S.open=1;$("panel").classList.add("open");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.p===n));render()}
-$("m").onclick=()=>{$("panel").classList.toggle("open")};$("x").onclick=()=>$("panel").classList.remove("open");
+else{pb.innerHTML=`<div class="card"><h3>Machine surface</h3><p>GET /api/agent · GET /api/actions</p><button onclick="navigator.clipboard.writeText(location.origin+'/api/agent');toast('Copied')">Copy agent URL</button></div>`}}
+function go(n){S.p=n;$("panel").classList.add("open");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.p===n));render()}
+$("m").onclick=()=>$("panel").classList.toggle("open");$("x").onclick=()=>$("panel").classList.remove("open");
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>go(b.dataset.p));
-$("send").onclick=()=>{const v=$("in").value.trim();if(!v)return;add("user",v);$("in").value="";const l=v.toLowerCase();if(l.includes("skill")){add("bot","Opening skills.",[{l:"Browse skills",i:"skills"}]);go("skills")}else if(l.includes("sell")){add("bot","Sell on the internal market.",[{l:"Create listing",i:"sell"}]);go("sell")}else if(l.includes("agent")||l.includes("api")){add("bot","Agents use structured actions.",[{l:"Agent API",i:"agent"}]);go("agent")}else{add("bot","Shop auctions, equip skills, or list inventory.",[{l:"Markets",i:"markets"},{l:"Skills",i:"skills"}]);go("markets")}};
+$("send").onclick=()=>{const v=$("in").value.trim();if(!v)return;add("user",v);$("in").value="";const l=v.toLowerCase();if(l.includes("skill")){go("skills");add("bot","Opening skills.")}else if(l.includes("sell")){go("sell");add("bot","Sell on the market.")}else if(l.includes("agent")||l.includes("api")){go("agent");add("bot","Agent surface.")}else{go("markets");add("bot","Opening markets.")}};
 $("in").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
-// background video: try local, then CDN fallback
-(function(){
-  const v=$("bgv"), poster=$("poster");
-  const sources=["/media/welcome.mp4","https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4"];
-  let i=0;
-  function tryPlay(){
-    if(i>=sources.length){v.style.display="none";return}
-    v.src=sources[i];
-    const p=v.play();
-    if(p&&p.catch)p.catch(()=>{i++;tryPlay()});
-  }
-  v.addEventListener("error",()=>{i++;tryPlay()},{once:false});
-  v.addEventListener("playing",()=>{poster.style.opacity="0";poster.style.transition="opacity .6s"});
-  tryPlay();
-})();
+const v=$("bgv");v.play().catch(()=>{});v.addEventListener("playing",()=>{$("poster").style.opacity="0";$("poster").style.transition="opacity .6s"});
 add("bot","Welcome to LVL — humans converse, agents act. What do you want to do?",[{l:"Shop markets",i:"markets"},{l:"Equip skills",i:"skills"},{l:"Sell",i:"sell"}]);
 refresh();go("markets");
 </script></body></html>
