@@ -3,17 +3,35 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/media/(.*)", "destination": "https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@3f59005/media/$1" },
-    { "source": "/api", "destination": "/api/index" },
-    { "source": "/api/(.*)", "destination": "/api/index" }
+    {
+      "source": "/media/(.*)",
+      "destination": "https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@136f07d/media/$1"
+    },
+    {
+      "source": "/api",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "content-type,authorization,x-agent-id,x-payment" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,POST,OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "content-type,authorization,x-agent-id,x-payment"
+        }
       ]
     }
   ]
