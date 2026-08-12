@@ -1,361 +1,281 @@
-<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>LVL — Agentic Marketplace</title>
-<meta name="theme-color" content="#0a0a0b"/><link rel="icon" href="/favicon.svg"/>
-<style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0a0a0b;color:#f4f4f5;font-family:system-ui,-apple-system,sans-serif}
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>LVL — Agentic Marketplace</title><meta name="theme-color" content="#0a0a0b"/><link rel="icon" href="/favicon.svg"/><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0a0a0b;color:#f4f4f5;font-family:system-ui,sans-serif}
 .bg{position:fixed;inset:0;z-index:0;overflow:hidden}
 .bg video,.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .bg video{opacity:.55}
-.veil{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.28),transparent 50%),linear-gradient(180deg,rgba(10,10,11,.35),rgba(10,10,11,.92))}
+.veil{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.28),transparent 50%),linear-gradient(180deg,rgba(10,10,11,.4),rgba(10,10,11,.92))}
 .shell{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column}
-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;gap:12px}
-.brand b{font-size:14px;letter-spacing:.04em}.brand p{margin:0;font-size:11px;color:#a1a1aa}
-.bal{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:12px;background:rgba(24,24,27,.8);white-space:nowrap}
-.nav{display:flex;gap:6px;padding:0 16px 8px;overflow:auto;-webkit-overflow-scrolling:touch}
-button{border:1px solid rgba(255,255,255,.12);background:rgba(24,24,27,.75);color:#f4f4f5;border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;gap:8px}
+.brand b{font-size:14px}.brand p{margin:0;font-size:11px;color:#a1a1aa}
+.bal{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;background:rgba(24,24,27,.75);cursor:pointer}
+.nav{display:flex;gap:6px;padding:0 16px 8px;overflow:auto}
+button{border:1px solid rgba(255,255,255,.12);background:rgba(24,24,27,.7);color:#f4f4f5;border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer}
 button:disabled{opacity:.45;cursor:not-allowed}
-.nav button.on{background:linear-gradient(135deg,rgba(167,139,250,.4),rgba(56,189,248,.28))}
-main{flex:1;display:grid;place-items:center;padding:12px 16px 24px}
-.chat{width:min(560px,100%);background:rgba(24,24,27,.88);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;backdrop-filter:blur(16px);box-shadow:0 20px 50px rgba(0,0,0,.35)}
-h1{margin:0 0 6px;font-size:clamp(20px,5vw,24px);letter-spacing:-.03em}
-.sub{margin:0 0 14px;color:#a1a1aa;font-size:13px;line-height:1.45}
-#msgs{display:flex;flex-direction:column;gap:10px;max-height:min(42vh,360px);overflow:auto;margin-bottom:12px}
-.msg{padding:10px 12px;border-radius:14px;font-size:13px;line-height:1.45;border:1px solid rgba(255,255,255,.1)}
-.msg.bot{background:rgba(255,255,255,.05)}.msg.user{background:rgba(167,139,250,.18);align-self:flex-end;max-width:90%}
+.nav button.on{background:linear-gradient(135deg,rgba(167,139,250,.35),rgba(56,189,248,.25))}
+button.primary{background:linear-gradient(135deg,rgba(167,139,250,.45),rgba(56,189,248,.3))}
+main{flex:1;display:grid;place-items:center;padding:16px}
+.chat{width:min(560px,100%);background:rgba(24,24,27,.85);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;backdrop-filter:blur(16px)}
+h1{margin:0 0 6px;font-size:22px}.sub{margin:0 0 14px;color:#a1a1aa;font-size:13px;line-height:1.45}
+#msgs{display:flex;flex-direction:column;gap:10px;max-height:42vh;overflow:auto;margin-bottom:12px}
+.msg{padding:10px 12px;border-radius:14px;font-size:13px;border:1px solid rgba(255,255,255,.12)}
+.msg.bot{background:rgba(255,255,255,.05)}.msg.user{background:rgba(167,139,250,.15);align-self:flex-end}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.composer{display:flex;gap:8px}.composer input,.fld{flex:1;width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:10px 12px;font-size:14px}
-.composer button{min-width:72px}
-.panel{position:fixed;inset:0 0 0 auto;width:min(420px,100%);background:rgba(10,10,11,.96);border-left:1px solid rgba(255,255,255,.12);transform:translateX(100%);transition:.22s ease;z-index:5;display:flex;flex-direction:column}
-.panel.open{transform:none}
-.hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.composer{display:flex;gap:8px}.composer input{flex:1;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:10px 12px}
+.panel{position:fixed;inset:0 0 0 auto;width:min(440px,100%);background:rgba(10,10,11,.94);border-left:1px solid rgba(255,255,255,.12);transform:translateX(100%);transition:.22s;z-index:5;display:flex;flex-direction:column}
+.panel.open{transform:none}.hd{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
 .bd{padding:14px 16px;overflow:auto;flex:1}
-.card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.03)}
+.card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;margin-bottom:10px}
 .card h3{margin:0 0 4px;font-size:13px}.card p{margin:0;color:#a1a1aa;font-size:12px;line-height:1.4}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
-.badge{font-size:11px;color:#38bdf8}
+.badge{font-size:11px;color:#38bdf8}.warn{color:#fbbf24}.ok{color:#86efac}
 .muted{color:#a1a1aa;font-size:12px}
-.tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.12);margin-right:4px;color:#c4b5fd}
-#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid rgba(255,255,255,.14);padding:10px 14px;border-radius:12px;font-size:12px;opacity:0;transition:.2s;z-index:10;max-width:90vw;pointer-events:none}
+.field{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.field label{font-size:11px;color:#a1a1aa}
+.field input,.field select,.field textarea{border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:9px 10px;font-size:13px}
+.field textarea{min-height:64px;resize:vertical}
+.err{color:#fca5a5;font-size:12px;margin-top:8px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-size:10px;margin-right:4px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;font-size:12px;opacity:0;transition:.2s;z-index:10;max-width:90vw}
 #toast.show{opacity:1}
-@media(max-width:480px){.composer{flex-direction:column}.composer button{width:100%}}
-</style></head><body>
-<div class="bg">
-  <img id="poster" alt="" src="/media/poster.jpg"/>
-  <video id="bgv" muted loop playsinline autoplay poster="/media/poster.jpg">
-    <source id="vidSrc" src="/media/welcome.mp4" type="video/mp4"/>
-  </video>
-  <div class="veil"></div>
-</div>
-<div class="shell">
-  <header>
-    <div style="display:flex;gap:10px;align-items:center">
-      <button id="m" aria-label="Open panel">☰</button>
-      <div class="brand"><b>LVL</b><p>agentic.lvlltd.com</p></div>
-    </div>
-    <div class="bal" id="bal">— USDC</div>
-  </header>
-  <nav class="nav">
-    <button data-p="markets" class="on">Markets</button>
-    <button data-p="skills">Skills</button>
-    <button data-p="sell">Sell</button>
-    <button data-p="orders">Orders</button>
-    <button data-p="agent">Agent</button>
-  </nav>
-  <main>
-    <section class="chat">
-      <h1>Welcome to LVL</h1>
-      <p class="sub">Conversation for humans. Machine-speed markets for agents. Fee 3.3%.</p>
-      <div id="msgs"></div>
-      <div class="composer">
-        <input id="in" placeholder="Ask to shop, bid, equip a skill…" autocomplete="off"/>
-        <button id="send">Send</button>
-      </div>
-    </section>
-  </main>
-</div>
-<aside class="panel" id="panel">
-  <div class="hd"><div class="brand"><b id="pt">Markets</b><p id="psub">Live API</p></div><button id="x" aria-label="Close">✕</button></div>
-  <div class="bd" id="pb"><p class="muted">Loading…</p></div>
-</aside>
-<div id="toast"></div>
-<script>
-const CDN = "https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media";
-const S = { p: "markets", me: null, auctions: [], listings: [], skills: [], orders: [], agent: null, loading: false, err: null };
-const $ = (id) => document.getElementById(id);
-const toast = (t) => { const e = $("toast"); e.textContent = t; e.classList.add("show"); setTimeout(() => e.classList.remove("show"), 2800); };
-const money = (n) => (Number(n) || 0).toFixed(2) + " USDC";
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&"+"amp;", "<":"&"+"lt;", ">":"&"+"gt;", '"':"&"+"quot;", "'":"&#39;" }[c]));
-
-/* A — same-origin media with CDN fallback */
-(function setupMedia() {
-  const poster = $("poster");
-  const video = $("bgv");
-  const src = $("vidSrc");
-  let fellBack = false;
-  const toCdn = () => {
-    if (fellBack) return;
-    fellBack = true;
-    poster.src = CDN + "/poster.jpg";
-    video.setAttribute("poster", CDN + "/poster.jpg");
-    src.src = CDN + "/welcome.mp4";
-    video.load();
-    video.play().catch(() => {});
-  };
-  poster.addEventListener("error", toCdn);
-  video.addEventListener("error", toCdn);
-  src.addEventListener("error", toCdn);
-  video.muted = true;
-  video.play().catch(() => {});
-  video.addEventListener("playing", () => {
-    poster.style.opacity = "0";
-    poster.style.transition = "opacity .6s";
-  });
-  // If same-origin 404s quickly, fall back after load timeout
-  setTimeout(() => {
-    if (video.readyState < 2 && video.networkState === 3) toCdn();
-  }, 2500);
-})();
-
-function add(role, text, acts = []) {
-  const d = document.createElement("div");
-  d.className = "msg " + role;
-  d.appendChild(document.createTextNode(text));
-  if (acts.length) {
-    const a = document.createElement("div");
-    a.className = "actions";
-    acts.forEach((x) => {
-      const b = document.createElement("button");
-      b.textContent = x.l;
-      b.onclick = () => go(x.i);
-      a.appendChild(b);
-    });
-    d.appendChild(a);
-  }
-  $("msgs").appendChild(d);
-  $("msgs").scrollTop = 1e9;
+</style></head><body><div class="bg"><img id="poster" src="/media/poster.jpg" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg'"/><video id="bgv" muted loop playsinline autoplay poster="/media/poster.jpg"><source src="/media/welcome.mp4" type="video/mp4"/><source src="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4" type="video/mp4"/></video><div class="veil"></div></div><div class="shell"><header><div style="display:flex;gap:10px;align-items:center"><button id="m" type="button">☰</button><div class="brand"><b>LVL</b><p>agentic.lvlltd.com · v1.4</p></div></div><div class="bal" id="bal" title="Open orders / balance">— USDC</div></header><nav class="nav"><button type="button" data-p="markets" class="on">Markets</button><button type="button" data-p="skills">Skills</button><button type="button" data-p="sell">Sell</button><button type="button" data-p="orders">Orders</button><button type="button" data-p="agent">Agent</button></nav><main><section class="chat"><h1>Welcome to LVL</h1><p class="sub">Conversation for humans. Machine-speed markets for agents. Fee 3.3%.</p><div id="msgs"></div><div class="composer"><input id="in" placeholder="Try: markets, flash, skills, orders…"/><button id="send" type="button">Send</button></div></section></main></div><aside class="panel" id="panel"><div class="hd"><div class="brand"><b id="pt">Markets</b><p id="psub">Live API</p></div><button id="x" type="button">✕</button></div><div class="bd" id="pb"></div></aside><div id="toast"></div><script>
+const CDN_POSTER="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg";
+const CDN_VIDEO="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4";
+const FEE=0.033;
+const S={p:"markets", balance:null, owned:new Set(), equipped:new Set()};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const money=n=>Number(n||0).toFixed(2);
+const feeOf=n=>Math.round(Number(n)*FEE*1e6)/1e6;
+const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),2800)};
+function setBal(n){if(n==null||!Number.isFinite(Number(n)))return;S.balance=Number(n);$("bal").textContent=money(S.balance)+" USDC"}
+function applyMe(me){
+if(!me)return;
+setBal(me.balance_usdc??me.balanceUsdc);
+S.owned=new Set(me.ownedSkillIds||[]);
+S.equipped=new Set(me.equippedSkills||[]);
 }
-
-async function api(path, opts) {
-  const r = await fetch(path, Object.assign({ headers: { "content-type": "application/json" } }, opts || {}));
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || j.message || r.statusText || "request_failed");
-  return j;
+async function api(path,opts){
+const r=await fetch(path,{headers:{"content-type":"application/json",...(opts&&opts.headers||{})},...opts});
+let j=null; try{j=await r.json()}catch{j={ok:false,error:"bad_json"}}
+if(!r.ok){const err=new Error((j&& (j.error||j.message))||("HTTP "+r.status)); err.payload=j; err.status=r.status; throw err}
+if(j&&j.me) applyMe(j.me);
+if(j&&j.balance_usdc!=null) setBal(j.balance_usdc);
+return j;
 }
-
-async function refresh() {
-  S.loading = true;
-  try {
-    const [agent, auctions, listings, skills, orders] = await Promise.all([
-      api("/api/agent"),
-      api("/api/auctions"),
-      api("/api/listings"),
-      api("/api/skills"),
-      api("/api/orders"),
-    ]);
-    S.agent = agent;
-    S.auctions = auctions.auctions || [];
-    S.listings = listings.listings || [];
-    S.skills = skills.skills || [];
-    S.orders = orders.orders || [];
-    S.me = orders.me || null;
-    S.err = null;
-    $("bal").textContent = money(S.me ? (S.me.balance_usdc ?? S.me.balanceUsdc) : (orders.balance_usdc ?? 250));
-    render();
-  } catch (e) {
-    S.err = e.message;
-    $("bal").textContent = "offline";
-    toast("API: " + e.message);
-    render();
-  } finally {
-    S.loading = false;
-  }
+function add(role,text,acts=[]){
+const d=document.createElement("div"); d.className="msg "+role; d.appendChild(document.createTextNode(text));
+if(acts.length){const a=document.createElement("div"); a.className="actions";
+acts.forEach(x=>{const b=document.createElement("button"); b.type="button"; b.textContent=x.l; b.onclick=()=>go(x.i); a.appendChild(b)});
+d.appendChild(a)}
+$("msgs").appendChild(d); $("msgs").scrollTop=$("msgs").scrollHeight;
 }
-
-function titles() {
-  return { markets: "Markets", skills: "Skills", sell: "Sell", orders: "Orders", agent: "Agent API" };
+function fmtEta(sec){
+if(sec==null) return "";
+if(sec<=0) return "ended";
+const m=Math.floor(sec/60), s=sec%60;
+if(m>=60) return Math.floor(m/60)+"h "+(m%60)+"m";
+return m+"m "+s+"s";
 }
-
-function render() {
-  const t = S.p;
-  $("pt").textContent = titles()[t] || t;
-  $("psub").textContent = S.err ? "Error · retry" : "Live · /api";
-  const pb = $("pb");
-  if (S.err && !S.auctions.length) {
-    pb.innerHTML = `<div class="card"><h3>Could not load</h3><p>${esc(S.err)}</p><div class="row"><button id="retry">Retry</button></div></div>`;
-    const r = document.getElementById("retry"); if (r) r.onclick = () => refresh();
-    return;
-  }
-  if (t === "markets") {
-    const auc = S.auctions.map((a) => {
-      const high = a.current_high_bid ?? a.highBidUsdc ?? 0;
-      const min = high + (a.minIncrementUsdc || 0.5);
-      return `<div class="card">
-        <h3>${esc(a.title || a.listing?.title || a.id)}</h3>
-        <p>${esc(a.description || a.listing?.description || "")}</p>
-        <div class="row">
-          <span class="badge">${esc(a.auction_type || a.kind || "english")} · high ${money(high)}</span>
-          <button data-bid="${esc(a.id)}" data-min="${min}">Bid ≥ ${money(min)}</button>
-        </div>
-      </div>`;
-    }).join("");
-    const fixed = S.listings.filter((l) => (l.pricingMode || "").includes("fixed") || l.pricingMode === "bargain").map((l) =>
-      `<div class="card"><h3>${esc(l.title)}</h3><p>${esc(l.description || "")} · ${esc(l.pricingMode)} · ${esc(l.type)}</p>
-      <div class="row"><span class="badge">${money(l.priceUsdc)}</span><span class="tag">listing</span></div></div>`
-    ).join("");
-    pb.innerHTML = (auc || "<p class='muted'>No open auctions.</p>") + (fixed ? "<p class='muted' style='margin:14px 0 8px'>Fixed / bargain listings</p>" + fixed : "");
-    pb.querySelectorAll("[data-bid]").forEach((b) => {
-      b.onclick = async () => {
-        const min = Number(b.dataset.min) || 0;
-        const raw = prompt("Bid amount (USDC)", String(min));
-        if (raw == null || raw === "") return;
-        const amount = Number(raw);
-        try {
-          await api("/api/auctions/" + b.dataset.bid + "/bids", { method: "POST", body: JSON.stringify({ amount_usdc: amount }) });
-          toast("Bid placed: " + money(amount));
-          add("bot", "Bid locked at " + money(amount) + " on " + b.dataset.bid + ".");
-          await refresh();
-        } catch (e) { toast(e.message); }
-      };
-    });
-  } else if (t === "skills") {
-    pb.innerHTML = S.skills.map((s) => {
-      const owned = !!s.owned;
-      const equipped = !!s.equipped;
-      const btn = owned
-        ? (equipped ? `<button disabled>Equipped</button>` : `<button data-eq="${esc(s.id)}">Equip</button>`)
-        : `<button data-buy="${esc(s.id)}">Buy ${money(s.price_usdc ?? s.priceUsdc)}</button>`;
-      return `<div class="card"><h3>${esc(s.name)} ${owned ? '<span class="tag">owned</span>' : ""} ${equipped ? '<span class="tag">on</span>' : ""}</h3>
-        <p>${esc(s.description || "")}</p>
-        <div class="row"><span class="badge">${esc(s.category || "skill")} · ${money(s.price_usdc ?? s.priceUsdc)} + 3.3%</span>${btn}</div></div>`;
-    }).join("") || "<p class='muted'>No public skills.</p>";
-    pb.querySelectorAll("[data-buy]").forEach((b) => {
-      b.onclick = async () => {
-        try {
-          const j = await api("/api/skills/" + b.dataset.buy + "/purchase", { method: "POST", body: "{}" });
-          toast(j.already_owned ? "Already owned" : "Purchased (+3.3% fee)");
-          add("bot", "Skill purchased. Equip it from Skills.");
-          await refresh();
-        } catch (e) { toast(e.message); }
-      };
-    });
-    pb.querySelectorAll("[data-eq]").forEach((b) => {
-      b.onclick = async () => {
-        try {
-          await api("/api/agents/me/skills/equip", { method: "POST", body: JSON.stringify({ skill_id: b.dataset.eq }) });
-          toast("Skill equipped");
-          add("bot", "Equipped " + b.dataset.eq + ".");
-          await refresh();
-        } catch (e) { toast(e.message); }
-      };
-    });
-  } else if (t === "sell") {
-    pb.innerHTML = `<div class="card">
-      <h3>Create listing</h3>
-      <p>Internal market · 3.3% platform fee on trades</p>
-      <input class="fld" id="lt" placeholder="Title" style="margin-top:10px"/>
-      <input class="fld" id="ld" placeholder="Description (optional)" style="margin-top:8px"/>
-      <input class="fld" id="lp" placeholder="Price USDC" inputmode="decimal" style="margin-top:8px"/>
-      <div class="row"><button id="cl">List item</button></div>
-    </div>
-    <p class="muted">Your recent listings</p>
-    ${(S.listings.filter((l) => l.sellerId === (S.me && S.me.id)).map((l) =>
-      `<div class="card"><h3>${esc(l.title)}</h3><p>${money(l.priceUsdc)} · ${esc(l.pricingMode)} · ${esc(l.status)}</p></div>`
-    ).join("") || "<p class='muted'>No listings from you yet.</p>")}`;
-    const cl = document.getElementById("cl");
-    if (cl) cl.onclick = async () => {
-      const title = document.getElementById("lt").value.trim();
-      const description = document.getElementById("ld").value.trim();
-      const price = Number(document.getElementById("lp").value);
-      if (!title || !(price > 0)) { toast("Title and positive price required"); return; }
-      try {
-        await api("/api/listings", { method: "POST", body: JSON.stringify({ title, description: description || title, type: "digital", pricing_mode: "fixed", price_usdc: price }) });
-        toast("Listed");
-        add("bot", "Listed “" + title + "” at " + money(price) + ".");
-        document.getElementById("lt").value = "";
-        document.getElementById("ld").value = "";
-        document.getElementById("lp").value = "";
-        await refresh();
-      } catch (e) { toast(e.message); }
-    };
-  } else if (t === "orders") {
-    pb.innerHTML = (S.orders || []).map((o) =>
-      `<div class="card"><h3>${esc(o.kind || "order")} · ${money(o.amount_usdc ?? o.amountUsdc)}</h3>
-      <p>Fee ${money(o.platform_fee_usdc ?? o.feeUsdc)} · ${esc(o.status || "paid")} · ${esc((o.createdAt || "").slice(0, 19).replace("T", " "))}</p></div>`
-    ).join("") || "<p class='muted'>No orders yet. Purchase a skill or create a listing.</p>";
-  } else {
-    const a = S.agent || {};
-    pb.innerHTML = `<div class="card">
-      <h3>Machine surface</h3>
-      <p>Bot entry: <code>/api/agent</code></p>
-      <p>Version ${esc(a.version || "—")} · fee ${(Number(a.fee_rate || 0.033) * 100).toFixed(1)}%</p>
-      <p class="muted" style="margin-top:8px">Agents: GET /api/agent → /api/actions → bid or buy skills.</p>
-      <div class="row">
-        <button id="cpy">Copy agent URL</button>
-        <button data-p2="markets">Open markets</button>
-      </div>
-    </div>
-    <div class="card"><h3>Stats</h3>
-      <p>Open auctions: ${esc(a.stats?.open_auctions ?? S.auctions.length)}</p>
-      <p>Active listings: ${esc(a.stats?.active_listings ?? S.listings.length)}</p>
-      <p>Public skills: ${esc(a.skills?.public_count ?? S.skills.length)}</p>
-    </div>`;
-    const c = document.getElementById("cpy");
-    if (c) c.onclick = () => { navigator.clipboard.writeText(location.origin + "/api/agent"); toast("Copied /api/agent"); };
-    pb.querySelectorAll("[data-p2]").forEach((b) => b.onclick = () => go(b.dataset.p2));
-  }
+async function refreshMe(){
+try{ const j=await api("/api/me"); applyMe(j.me); return j.me; }catch(e){ console.warn(e); }
 }
-
-function go(name) {
-  S.p = name;
-  $("panel").classList.add("open");
-  document.querySelectorAll(".nav button").forEach((b) => b.classList.toggle("on", b.dataset.p === name));
-  render();
+async function go(n){
+S.p=n; $("panel").classList.add("open");
+document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.p===n));
+$("pt").textContent={markets:"Markets",skills:"Skills",sell:"Sell",orders:"Orders",agent:"Agent"}[n];
+$("psub").textContent="Live API · fee 3.3%";
+const pb=$("pb"); pb.innerHTML='<p class="muted">Loading…</p>';
+try{
+if(n==="markets") await renderMarkets(pb);
+else if(n==="skills") await renderSkills(pb);
+else if(n==="sell") renderSell(pb);
+else if(n==="orders") await renderOrders(pb);
+else await renderAgent(pb);
+}catch(e){ pb.innerHTML=`<p class="err">${esc(e.message||e)}</p>` }
 }
-
-$("m").onclick = () => $("panel").classList.toggle("open");
-$("x").onclick = () => $("panel").classList.remove("open");
-document.querySelectorAll(".nav button").forEach((b) => b.onclick = () => go(b.dataset.p));
-
-function handleChat(v) {
-  add("user", v);
-  const l = v.toLowerCase();
-  if (/skill|equip|power/.test(l)) {
-    add("bot", "Skills are live from the catalog. Purchase deducts balance + 3.3% fee; equip after buy.", [{ l: "Browse skills", i: "skills" }]);
-    go("skills");
-  } else if (/sell|list|inventory/.test(l)) {
-    add("bot", "Create a listing on the internal market. Fee 3.3% on settlement.", [{ l: "Sell", i: "sell" }]);
-    go("sell");
-  } else if (/order|history|balance/.test(l)) {
-    add("bot", "Orders and balance come from the live API.", [{ l: "Orders", i: "orders" }]);
-    go("orders");
-  } else if (/agent|api|bot|machine/.test(l)) {
-    add("bot", "Agents start at GET /api/agent — self-describing actions, auctions, skills.", [{ l: "Agent API", i: "agent" }]);
-    go("agent");
-  } else if (/bid|auction|market|shop|buy/.test(l)) {
-    add("bot", "Open auctions and listings from the market engine.", [{ l: "Markets", i: "markets" }]);
-    go("markets");
-  } else {
-    add("bot", "I can open live markets, skills, sell, or orders — all wired to /api/*.", [
-      { l: "Markets", i: "markets" }, { l: "Skills", i: "skills" }, { l: "Sell", i: "sell" }
-    ]);
-    go("markets");
-  }
+async function renderMarkets(pb){
+await refreshMe();
+const [auctionsRes, listingsRes]=await Promise.all([api("/api/auctions"), api("/api/listings")]);
+const auctions=auctionsRes.auctions||[];
+const open=auctions.filter(a=>a.status==="open");
+const closed=auctions.filter(a=>a.status!=="open");
+const listings=listingsRes.listings||[];
+const auctionListingIds=new Set(auctions.map(a=>a.listingId||a.listing?.id));
+let html=`<p class="muted">Balance <span class="ok">${money(S.balance)}</span> USDC. Flash Lot auto-closes ~3 min after cold start for lifecycle demos.</p>`;
+html+=`<p class="muted" style="margin-top:10px">Open auctions (${open.length})</p>`;
+if(!open.length) html+=`<div class="card"><p>No open auctions.</p></div>`;
+for(const a of open){
+const title=a.title||a.listing?.title||a.id;
+const kind=a.auction_type||a.kind||"english";
+const sealed=!!a.sealed;
+const high=sealed? "sealed" : money(a.current_high_bid??a.highBidUsdc??0);
+const minInc=a.minIncrementUsdc??0.5;
+const next=sealed? (a.reserveUsdc||a.listing?.priceUsdc||1) : Number(a.current_high_bid??a.highBidUsdc??0)+Number(minInc);
+const desc=a.description||a.listing?.description||"";
+const eta=fmtEta(a.seconds_remaining);
+html+=`<div class="card"><h3>${esc(title)} ${a.closing_soon?'<span class="pill warn">closing soon</span>':''}</h3><p>${esc(kind)}${sealed?' · sealed':''} · ${esc(desc)}</p><div class="row"><span class="badge">${sealed?'Bids sealed':('High '+high+' USDC')}</span><span class="muted">${esc(eta)}</span></div><div class="field"><label>Bid amount (USDC)</label><input type="number" step="0.01" value="${money(next)}" data-bid-input="${esc(a.id)}"/></div><div class="row"><span class="muted">Fee if you win ~${money(feeOf(next))}</span><button type="button" class="primary" data-bid="${esc(a.id)}">Place bid</button><button type="button" data-close="${esc(a.id)}">Close now</button></div></div>`;
 }
-
-$("send").onclick = () => {
-  const v = $("in").value.trim();
-  if (!v) return;
-  $("in").value = "";
-  handleChat(v);
+html+=`<p class="muted" style="margin-top:14px">Buy now (fixed)</p>`;
+const fixed=listings.filter(l=>l.status==="active"&&l.pricingMode==="fixed");
+if(!fixed.length) html+=`<div class="card"><p>No fixed listings.</p></div>`;
+for(const l of fixed){
+const total=Number(l.priceUsdc)+feeOf(l.priceUsdc);
+html+=`<div class="card"><h3>${esc(l.title)}</h3><p>${esc(l.type)} · ${esc(l.description||"")}</p><div class="row"><span class="badge">${money(l.priceUsdc)} + ${money(feeOf(l.priceUsdc))} fee</span><span class="muted">total ${money(total)}</span></div><div class="row"><button type="button" class="primary" data-buy-listing="${esc(l.id)}">Buy</button></div></div>`;
+}
+const other=listings.filter(l=>l.status==="active"&&!auctionListingIds.has(l.id)&&l.pricingMode!=="fixed");
+if(other.length){
+html+=`<p class="muted" style="margin-top:14px">Other active</p>`;
+for(const l of other){
+html+=`<div class="card"><h3>${esc(l.title)}</h3><p>${esc(l.pricingMode)} · ${money(l.priceUsdc)} USDC</p></div>`;
+}
+}
+if(closed.length){
+html+=`<p class="muted" style="margin-top:14px">Closed / cleared</p>`;
+for(const a of closed.slice(0,8)){
+html+=`<div class="card"><h3>${esc(a.title||a.id)}</h3><p>${esc(a.status)}${a.closeReason?(' · '+esc(a.closeReason)):''}${a.clearPriceUsdc!=null?(' · clear '+money(a.clearPriceUsdc)):''}</p><p class="muted">${a.winnerId?('winner '+esc(a.winnerId)): 'no winner'}</p></div>`;
+}
+}
+pb.innerHTML=html;
+pb.querySelectorAll("[data-bid]").forEach(btn=>{
+btn.onclick=async()=>{
+const id=btn.getAttribute("data-bid");
+const input=pb.querySelector(`[data-bid-input="${CSS.escape(id)}"]`);
+const amount=Number(input&&input.value);
+btn.disabled=true;
+try{
+const j=await api(`/api/auctions/${encodeURIComponent(id)}/bids`,{method:"POST",body:JSON.stringify({amount_usdc:amount})});
+toast(j.message||(`Bid ${money(j.bid?.amountUsdc??amount)} · fee if won ${money(j.fee_if_won??feeOf(amount))}`));
+add("bot", j.message||`Bid placed on ${id}.`);
+await go("markets");
+}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
 };
-$("in").addEventListener("keydown", (e) => { if (e.key === "Enter") $("send").click(); });
-
-add("bot", "Welcome to LVL — humans converse, agents act. Markets and skills load from the live API.", [
-  { l: "Markets", i: "markets" }, { l: "Skills", i: "skills" }, { l: "Sell", i: "sell" }
-]);
-refresh();
+});
+pb.querySelectorAll("[data-close]").forEach(btn=>{
+btn.onclick=async()=>{
+btn.disabled=true;
+try{
+const j=await api(`/api/auctions/${encodeURIComponent(btn.dataset.close)}/close`,{method:"POST",body:JSON.stringify({force:true})});
+const a=j.auction||{};
+toast(a.status==="cleared"?`Cleared @ ${money(a.clearPriceUsdc)}`:`Closed: ${a.status}${a.closeReason?(' '+a.closeReason):''}`);
+if(j.order) add("bot",`You won — order ${j.order.id}. Fee ${money(j.order.feeUsdc)} USDC.`);
+await go(j.order?"orders":"markets");
+}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
+};
+});
+pb.querySelectorAll("[data-buy-listing]").forEach(btn=>{
+btn.onclick=async()=>{
+btn.disabled=true;
+try{
+const j=await api(`/api/listings/${encodeURIComponent(btn.dataset.buyListing)}/purchase`,{method:"POST",body:"{}"});
+toast(`Purchased · total ${money(j.order?.total_usdc)} · bal ${money(j.balance_usdc)}`);
+add("bot",`Bought ${j.order?.title||"listing"}. Fee ${money(j.order?.feeUsdc)} (3.3%).`);
+await go("orders");
+}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
+};
+});
+}
+async function renderSkills(pb){
+await refreshMe();
+const skillsRes=await api("/api/skills");
+const skills=skillsRes.skills||[];
+(skillsRes.ownedSkillIds||[]).forEach(id=>S.owned.add(id));
+(skillsRes.equippedSkills||[]).forEach(id=>S.equipped.add(id));
+let html=`<p class="muted">Owned ${S.owned.size} · equipped ${S.equipped.size}. Legacy 247 hidden.</p>`;
+for(const sk of skills){
+const price=sk.price_usdc??sk.priceUsdc??0;
+const isOwned=S.owned.has(sk.id);
+const isEq=S.equipped.has(sk.id);
+html+=`<div class="card"><h3>${esc(sk.name)}</h3><p>${esc(sk.description||"")} · ${esc(sk.category||"")}</p><div class="row"><span class="badge">${money(price)} + ${money(feeOf(price))} fee</span><span class="muted">${isEq?"Equipped":isOwned?"Owned":"Total "+money(price+feeOf(price))}</span></div><div class="row"><button type="button" class="primary" data-buy="${esc(sk.id)}" ${isOwned?"disabled":""}>${isOwned?"Purchased":"Buy"}</button><button type="button" data-equip="${esc(sk.id)}" ${!isOwned||isEq?"disabled":""}>Equip</button><button type="button" data-unequip="${esc(sk.id)}" ${!isEq?"disabled":""}>Unequip</button></div></div>`;
+}
+pb.innerHTML=html;
+pb.querySelectorAll("[data-buy]").forEach(btn=>{
+btn.onclick=async()=>{
+btn.disabled=true;
+try{
+const j=await api(`/api/skills/${encodeURIComponent(btn.dataset.buy)}/purchase`,{method:"POST",body:"{}"});
+if(j.already_owned) toast("Already owned");
+else toast(`Purchased · fee ${money(j.order?.feeUsdc||0)}`);
+await go("skills");
+}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
+};
+});
+pb.querySelectorAll("[data-equip]").forEach(btn=>{
+btn.onclick=async()=>{
+try{ await api("/api/agents/me/skills/equip",{method:"POST",body:JSON.stringify({skill_id:btn.dataset.equip})}); toast("Equipped"); await go("skills"); }
+catch(e){ toast(e.payload?.error||e.message) }
+};
+});
+pb.querySelectorAll("[data-unequip]").forEach(btn=>{
+btn.onclick=async()=>{
+try{ await api("/api/agents/me/skills/unequip",{method:"POST",body:JSON.stringify({skill_id:btn.dataset.unequip})}); toast("Unequipped"); await go("skills"); }
+catch(e){ toast(e.payload?.error||e.message) }
+};
+});
+}
+function renderSell(pb){
+pb.innerHTML=`<p class="muted">POST /api/listings — auctions auto-open when mode is english/vickrey.</p><div class="card"><div class="field"><label>Title</label><input id="sell-title" placeholder="Prompt Pack"/></div><div class="field"><label>Price / reserve (USDC)</label><input id="sell-price" type="number" step="0.01" min="0.01" value="12"/></div><div class="field"><label>Description</label><textarea id="sell-desc"></textarea></div><div class="field"><label>Type</label><select id="sell-type"><option value="digital">digital</option><option value="physical">physical</option></select></div><div class="field"><label>Pricing mode</label><select id="sell-mode"><option value="fixed">fixed</option><option value="bargain">bargain</option><option value="english_auction">english_auction</option><option value="vickrey_auction">vickrey_auction</option></select></div><div class="row"><span class="muted">Est. fee ${money(feeOf(12))}</span><button type="button" class="primary" id="sell-go">Publish</button></div><p class="err" id="sell-err" hidden></p></div>`;
+$("sell-go").onclick=async()=>{
+const err=$("sell-err"); err.hidden=true;
+const body={title:$("sell-title").value.trim(), price_usdc:Number($("sell-price").value), description:$("sell-desc").value.trim(), type:$("sell-type").value, pricing_mode:$("sell-mode").value};
+try{
+const j=await api("/api/listings",{method:"POST",body:JSON.stringify(body)});
+toast("Created "+(j.listing?.id||""));
+add("bot",`Listed “${body.title}”.`);
 go("markets");
-</script>
-</body></html>
+}catch(e){ err.hidden=false; err.textContent=e.payload?.error||e.message }
+};
+}
+async function renderOrders(pb){
+const o=await api("/api/orders");
+applyMe(o.me);
+const orders=o.orders||[];
+let html=`<div class="card"><h3>Balance</h3><div class="row"><span class="badge" style="font-size:16px">${money(S.balance)} USDC</span><span class="muted">fee rate ${(FEE*100).toFixed(1)}%</span></div><p class="muted" style="margin-top:6px">Demo wallet persists for the warm serverless instance.</p></div>`;
+html+=`<p class="muted">Order history (${orders.length})</p>`;
+if(!orders.length) html+=`<div class="card"><p>No orders yet. Buy a fixed listing, win an auction, or purchase a skill.</p></div>`;
+for(const ord of orders){
+const fulfill=ord.fulfillment||{};
+html+=`<div class="card"><h3>${esc(ord.title||ord.kind||"order")}</h3><p>${esc(ord.kind)} · ${esc(ord.id)}</p><div class="row"><span class="badge">${money(ord.amount_usdc??ord.amountUsdc)} + fee ${money(ord.platform_fee_usdc??ord.feeUsdc)}</span><span class="muted">total ${money(ord.total_usdc)}</span></div><div class="row"><span class="pill">${esc(ord.status||"paid")}</span><span class="muted">${esc(fulfill.kind||"")} · ${esc(fulfill.status||"")}</span></div><p class="muted">${esc(ord.createdAt||"")}</p></div>`;
+}
+html+=`<p class="muted" style="margin-top:12px">Equipped skills</p>`;
+const eq=[...S.equipped];
+html+= eq.length? eq.map(id=>`<div class="card"><h3>${esc(id)}</h3><button type="button" data-unequip="${esc(id)}">Unequip</button></div>`).join("") : `<div class="card"><p>None equipped.</p></div>`;
+pb.innerHTML=html;
+pb.querySelectorAll("[data-unequip]").forEach(btn=>{
+btn.onclick=async()=>{
+try{ await api("/api/agents/me/skills/unequip",{method:"POST",body:JSON.stringify({skill_id:btn.dataset.unequip})}); await go("orders"); }
+catch(e){ toast(e.payload?.error||e.message) }
+};
+});
+}
+async function renderAgent(pb){
+const [agent, actions]=await Promise.all([api("/api/agent"), api("/api/actions")]);
+let html=`<div class="card"><h3>${esc(agent.name)}</h3><p>v${esc(agent.version)} · fee ${(agent.fee_rate*100).toFixed(1)}%</p><p class="muted">open auctions ${esc(agent.stats?.open_auctions)} · orders ${esc(agent.stats?.orders)} · bal ${money(agent.stats?.balance_usdc)}</p></div><div class="card"><h3>First contact</h3><p>1. ${esc(agent.first_contact?.step_1)}</p><p>2. ${esc(agent.first_contact?.step_2)}</p><p>3. ${esc(agent.first_contact?.step_3)}</p><div class="row"><a class="badge" href="/api/openapi.json" target="_blank" rel="noopener">OpenAPI</a><a class="badge" href="/api/me" target="_blank" rel="noopener">/api/me</a></div></div><p class="muted">Actions</p>`;
+for(const a of (actions.actions||[])) html+=`<div class="card"><h3>${esc(a.name)}</h3><p>${esc(a.method)} ${esc(a.path)}</p></div>`;
+pb.innerHTML=html;
+}
+function handleChat(raw){
+const v=raw.trim(); if(!v) return;
+add("user",v); $("in").value="";
+const t=v.toLowerCase();
+if(/flash|close|lifecycle/.test(t)){ add("bot","Opening markets — use Flash Lot or Close now to exercise the lifecycle."); return go("markets") }
+if(/skill/.test(t)){ add("bot","Opening skills."); return go("skills") }
+if(/sell|list/.test(t)){ add("bot","Opening sell."); return go("sell") }
+if(/order|balance|equip/.test(t)){ add("bot","Opening orders & balance."); return go("orders") }
+if(/agent|api|openapi/.test(t)){ add("bot","Agent surface under /api/*."); return go("agent") }
+if(/market|auction|bid|shop|buy/.test(t)){ add("bot","Opening live markets."); return go("markets") }
+add("bot","Try Markets, Skills, Sell, Orders, or Agent.",[{l:"Markets",i:"markets"},{l:"Orders",i:"orders"},{l:"Skills",i:"skills"}]);
+}
+$("m").onclick=()=>$("panel").classList.toggle("open");
+$("x").onclick=()=>$("panel").classList.remove("open");
+$("bal").onclick=()=>go("orders");
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>go(b.dataset.p));
+$("send").onclick=()=>handleChat($("in").value);
+$("in").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
+const v=$("bgv"); v.muted=true; v.play().catch(()=>{});
+v.addEventListener("error",()=>{ if(v.dataset.cdn) return; v.dataset.cdn="1"; v.src=CDN_VIDEO; v.poster=CDN_POSTER; v.load(); v.play().catch(()=>{}) });
+v.addEventListener("playing",()=>{$("poster").style.opacity="0"; $("poster").style.transition="opacity .6s"});
+add("bot","Welcome to LVL — auctions close, wins settle with 3.3% fee, skills equip, balance updates.",
+[{l:"Markets",i:"markets"},{l:"Orders",i:"orders"},{l:"Skills",i:"skills"}]);
+refreshMe().then(()=>go("markets"));
+setInterval(()=>{ if(S.p==="markets" && $("panel").classList.contains("open")) go("markets"); }, 30000);
+</script></body></html>
