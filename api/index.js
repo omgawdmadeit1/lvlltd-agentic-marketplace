@@ -72,7 +72,7 @@ function openAuctions() {
     .filter((a) => a.status === "open")
     .map((a) => {
       const listing = s.listings.find((l) => l.id === a.listingId);
-      return listing ? { ...a, listing } : null;
+      return listing ? { ...a, listing, title: listing.title, description: listing.description, auction_type: a.kind || "english", current_high_bid: a.highBidUsdc, highBidUsdc: a.highBidUsdc } : null;
     })
     .filter(Boolean);
 }
@@ -130,16 +130,22 @@ module.exports = async function handler(req, res) {
 
     const host = req.headers.host || "localhost";
     const url = new URL(req.url || "/", `https://${host}`);
-    let path = url.pathname;
-    // When routed via /api/index, Vercel may pass stripped path — normalize
-    if (path === "/api/index" || path === "/api/index.js") path = "/";
-    if (!path.startsWith("/api") && path !== "/") {
+    let path = url.pathname || "/";
+    // Vercel node function for /api may receive path with or without /api prefix.
+    // Normalize so all machine routes live under /api/*.
+    // Never serve machine JSON for bare "/". Human UI is static index.html.
+    // Only normalize serverless path quirks for the /api function.
+    if (path === "/api/index" || path === "/api/index.js") {
+      path = "/api/agent";
+    } else if (path === "/") {
+      // Mis-routed HTML request — refuse JSON so root cannot look like the agent API.
+      return send(res, 404, {
+        ok: false,
+        error: "not_an_api_route",
+        hint: "Human UI is at /. Agent entry is GET /api/agent",
+      });
+    } else if (!path.startsWith("/api")) {
       path = "/api" + (path.startsWith("/") ? path : "/" + path);
-    }
-    // If path is just / and original had /api/...
-    const original = req.url || "";
-    if (path === "/" && original.includes("/api/")) {
-      path = original.split("?")[0];
     }
 
     const m = (req.method || "GET").toUpperCase();

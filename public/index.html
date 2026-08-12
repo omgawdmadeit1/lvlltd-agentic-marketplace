@@ -4,15 +4,13 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>LVL — Agentic Marketplace</title>
-<meta name="description" content="Dual-interface agentic marketplace. Conversation for humans. Machine-speed markets for agents. 3.3% platform fee."/>
+<meta name="description" content="Conversation for humans. Machine-speed markets for agents. 3.3% fee."/>
 <meta name="theme-color" content="#0a0a0b"/>
 <link rel="icon" href="/favicon.svg"/>
 <style>
 :root{--bg:#0a0a0b;--fg:#f4f4f5;--muted:#a1a1aa;--card:rgba(24,24,27,.82);--border:rgba(255,255,255,.12);--accent:#a78bfa;--accent2:#38bdf8}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
-.bg video{width:100%;height:100%;object-fit:cover;opacity:.55}
-.bg .veil{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,11,.7),rgba(10,10,11,.55),rgba(10,10,11,.9)),radial-gradient(ellipse at center,transparent 0%,var(--bg) 75%)}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.22),transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(56,189,248,.16),transparent 45%),var(--bg)}
 .shell{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column}
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px}
 .brand h1{margin:0;font-size:14px;font-weight:600;letter-spacing:-.02em}
@@ -47,7 +45,7 @@ main{flex:1;display:grid;place-items:center;padding:16px}
 </style>
 </head>
 <body>
-<div class="bg"><video autoplay muted loop playsinline poster=""><source src="/media/welcome.mp4" type="video/mp4"/></video><div class="veil"></div></div>
+<div class="bg"></div>
 <div class="shell">
   <header>
     <div style="display:flex;gap:10px;align-items:center">
@@ -84,21 +82,21 @@ main{flex:1;display:grid;place-items:center;padding:16px}
 </aside>
 <div class="toast" id="toast"></div>
 <script>
-const state = { panel: 'markets', me: null, auctions: [], listings: [], skills: [], orders: [], open: true };
-const msgs = document.getElementById('msgs');
-const panel = document.getElementById('panel');
-const panelBody = document.getElementById('panelBody');
-const toastEl = document.getElementById('toast');
+const state={panel:'markets',me:null,auctions:[],listings:[],skills:[],orders:[],open:true};
+const msgs=document.getElementById('msgs');
+const panel=document.getElementById('panel');
+const panelBody=document.getElementById('panelBody');
+const toastEl=document.getElementById('toast');
 function toast(t){toastEl.textContent=t;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2800)}
-function addMsg(role, text, actions=[]){
-  const d=document.createElement('div'); d.className='msg '+role; d.textContent=text;
-  if(actions.length){const a=document.createElement('div'); a.className='actions';
-    actions.forEach(x=>{const b=document.createElement('button'); b.className='ghost'; b.textContent=x.label; b.onclick=()=>runAction(x); a.appendChild(b);});
+function addMsg(role,text,actions=[]){
+  const d=document.createElement('div');d.className='msg '+role;d.textContent=text;
+  if(actions.length){const a=document.createElement('div');a.className='actions';
+    actions.forEach(x=>{const b=document.createElement('button');b.className='ghost';b.textContent=x.label;b.onclick=()=>runAction(x);a.appendChild(b);});
     d.appendChild(a);}
-  msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
 }
-async function api(path, opts){
-  const r=await fetch(path, Object.assign({headers:{'content-type':'application/json'}}, opts||{}));
+async function api(path,opts){
+  const r=await fetch(path,Object.assign({headers:{'content-type':'application/json'}},opts||{}));
   const j=await r.json().catch(()=>({}));
   if(!r.ok) throw new Error(j.error||j.message||r.statusText);
   return j;
@@ -106,73 +104,73 @@ async function api(path, opts){
 function money(n){return (Number(n)||0).toFixed(2)+' USDC'}
 async function refresh(){
   try{
-    const [agent, auctions, skills, orders] = await Promise.all([
-      api('/api/agent'), api('/api/auctions?status=open'), api('/api/skills'), api('/api/orders')
+    const [agent,auctions,skills,orders]=await Promise.all([
+      api('/api/agent'),api('/api/auctions?status=open'),api('/api/skills'),api('/api/orders')
     ]);
-    state.me = orders.me || agent.me || null;
-    state.auctions = auctions.auctions||[];
-    state.skills = skills.skills||[];
-    state.orders = orders.orders||[];
-    document.getElementById('balance').textContent = state.me ? money(state.me.balance_usdc ?? state.me.balanceUsdc) : money(agent.stats?.demo_balance||1000);
+    state.me=orders.me||agent.me||null;
+    state.auctions=auctions.auctions||[];
+    state.skills=skills.skills||[];
+    state.orders=orders.orders||[];
+    document.getElementById('balance').textContent=state.me?money(state.me.balance_usdc??state.me.balanceUsdc):money(agent.stats?.demo_balance||250);
     renderPanel();
   }catch(e){toast('API: '+e.message)}
 }
 function renderPanel(){
-  const t=state.panel; document.getElementById('panelTitle').textContent={markets:'Markets',skills:'Skills',sell:'Sell',orders:'Orders',agent:'Agent API'}[t];
+  const t=state.panel;document.getElementById('panelTitle').textContent={markets:'Markets',skills:'Skills',sell:'Sell',orders:'Orders',agent:'Agent API'}[t];
   if(t==='markets'){
-    panelBody.innerHTML = state.auctions.map(a=>`<div class="card"><h3>${a.title||a.id}</h3><p>${a.description||''}</p><div class="row"><span class="badge">${a.auction_type||'english'} · high ${money(a.current_high_bid||a.reserve_price||0)}</span><button class="primary" data-bid="${a.id}">Bid</button></div></div>`).join('') || '<p class="sub">No open auctions.</p>';
+    panelBody.innerHTML=state.auctions.map(a=>`<div class="card"><h3>${a.title||a.listing?.title||a.id}</h3><p>${a.description||a.listing?.description||''}</p><div class="row"><span class="badge">${a.auction_type||a.kind||'english'} · high ${money(a.current_high_bid||a.highBidUsdc||a.reserve_price||0)}</span><button class="primary" data-bid="${a.id}">Bid</button></div></div>`).join('')||'<p class="sub">No open auctions.</p>';
     panelBody.querySelectorAll('[data-bid]').forEach(b=>b.onclick=async()=>{
-      const id=b.getAttribute('data-bid'); const amt=prompt('Bid amount USDC'); if(!amt) return;
-      try{await api('/api/auctions/'+id+'/bids',{method:'POST',body:JSON.stringify({amount_usdc:Number(amt)})}); toast('Bid placed'); refresh();}catch(e){toast(e.message)}
+      const id=b.getAttribute('data-bid');const amt=prompt('Bid amount USDC');if(!amt)return;
+      try{await api('/api/auctions/'+id+'/bids',{method:'POST',body:JSON.stringify({amount_usdc:Number(amt)})});toast('Bid placed');refresh();}catch(e){toast(e.message)}
     });
-  } else if(t==='skills'){
-    panelBody.innerHTML = state.skills.map(s=>`<div class="card"><h3>${s.name}</h3><p>${s.description||''}</p><div class="row"><span class="badge">${money(s.price_usdc||s.priceUsdc||0)}</span><button class="primary" data-buy="${s.id}">Purchase</button></div></div>`).join('') || '<p class="sub">No public skills.</p>';
+  }else if(t==='skills'){
+    panelBody.innerHTML=state.skills.map(s=>`<div class="card"><h3>${s.name}</h3><p>${s.description||''}</p><div class="row"><span class="badge">${money(s.price_usdc||s.priceUsdc||0)}</span><button class="primary" data-buy="${s.id}">Purchase</button></div></div>`).join('')||'<p class="sub">No public skills.</p>';
     panelBody.querySelectorAll('[data-buy]').forEach(b=>b.onclick=async()=>{
-      try{await api('/api/skills/'+b.getAttribute('data-buy')+'/purchase',{method:'POST',body:'{}'}); toast('Skill purchased'); refresh();}catch(e){toast(e.message)}
+      try{await api('/api/skills/'+b.getAttribute('data-buy')+'/purchase',{method:'POST',body:'{}'});toast('Skill purchased');refresh();}catch(e){toast(e.message)}
     });
-  } else if(t==='sell'){
-    panelBody.innerHTML = `<div class="card"><h3>Create listing</h3><p>Internal market · 3.3% fee on settlement</p>
+  }else if(t==='sell'){
+    panelBody.innerHTML=`<div class="card"><h3>Create listing</h3><p>Internal market · 3.3% fee on settlement</p>
       <input id="lt" placeholder="Title" style="width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid var(--border);background:#000;color:#fff"/>
       <input id="lp" placeholder="Price USDC" style="width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid var(--border);background:#000;color:#fff"/>
       <button class="primary" id="createListing">List</button></div>`;
     document.getElementById('createListing').onclick=async()=>{
-      const title=document.getElementById('lt').value.trim(); const price=Number(document.getElementById('lp').value);
-      try{await api('/api/listings',{method:'POST',body:JSON.stringify({title, description:title, type:'digital', pricing_mode:'fixed', price_usdc:price})}); toast('Listed'); refresh();}catch(e){toast(e.message)}
+      const title=document.getElementById('lt').value.trim();const price=Number(document.getElementById('lp').value);
+      try{await api('/api/listings',{method:'POST',body:JSON.stringify({title,description:title,type:'digital',pricing_mode:'fixed',price_usdc:price})});toast('Listed');refresh();}catch(e){toast(e.message)}
     };
-  } else if(t==='orders'){
-    panelBody.innerHTML = (state.orders||[]).map(o=>`<div class="card"><h3>${o.kind||'order'} · ${money(o.amount_usdc||o.amountUsdc)}</h3><p>Fee ${money(o.platform_fee_usdc||o.platformFeeUsdc)} · ${o.status}</p></div>`).join('') || '<p class="sub">No orders yet.</p>';
-  } else {
-    panelBody.innerHTML = `<div class="card"><h3>Machine surface</h3><p>GET /api/agent · GET /api/actions · OpenAPI at /api/openapi.json</p><p>Domain: agentic.lvlltd.com · Fee 3.3%</p><div class="actions"><button class="ghost" onclick="navigator.clipboard.writeText(location.origin+'/api/agent');toast('Copied /api/agent')">Copy agent URL</button></div></div>`;
+  }else if(t==='orders'){
+    panelBody.innerHTML=(state.orders||[]).map(o=>`<div class="card"><h3>${o.kind||'order'} · ${money(o.amount_usdc||o.amountUsdc)}</h3><p>Fee ${money(o.platform_fee_usdc||o.feeUsdc)} · ${o.status||'paid'}</p></div>`).join('')||'<p class="sub">No orders yet.</p>';
+  }else{
+    panelBody.innerHTML=`<div class="card"><h3>Machine surface</h3><p>GET /api/agent · GET /api/actions · OpenAPI at /api/openapi.json</p><p>Domain: agentic.lvlltd.com · Fee 3.3%</p><div class="actions"><button class="ghost" onclick="navigator.clipboard.writeText(location.origin+'/api/agent');toast('Copied /api/agent')">Copy agent URL</button></div></div>`;
   }
 }
 function setPanel(name){
-  state.panel=name; state.open=true; panel.classList.add('open');
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active', b.dataset.panel===name));
+  state.panel=name;state.open=true;panel.classList.add('open');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));
   renderPanel();
 }
 function runAction(x){
-  if(x.intent==='open_markets') setPanel('markets');
-  if(x.intent==='open_skills') setPanel('skills');
-  if(x.intent==='open_sell') setPanel('sell');
-  if(x.intent==='open_agent') setPanel('agent');
+  if(x.intent==='open_markets')setPanel('markets');
+  if(x.intent==='open_skills')setPanel('skills');
+  if(x.intent==='open_sell')setPanel('sell');
+  if(x.intent==='open_agent')setPanel('agent');
 }
-document.getElementById('menuBtn').onclick=()=>{state.open=!state.open; panel.classList.toggle('open', state.open);};
-document.getElementById('closePanel').onclick=()=>{state.open=false; panel.classList.remove('open');};
+document.getElementById('menuBtn').onclick=()=>{state.open=!state.open;panel.classList.toggle('open',state.open);};
+document.getElementById('closePanel').onclick=()=>{state.open=false;panel.classList.remove('open');};
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setPanel(b.dataset.panel));
 document.getElementById('send').onclick=()=>{
-  const v=document.getElementById('input').value.trim(); if(!v) return;
-  addMsg('user', v); document.getElementById('input').value='';
+  const v=document.getElementById('input').value.trim();if(!v)return;
+  addMsg('user',v);document.getElementById('input').value='';
   const lower=v.toLowerCase();
-  if(lower.includes('skill')){ addMsg('bot','Opening skills — equip power-ups that bargain, watch prices, and work for you.',[{label:'Browse skills',intent:'open_skills'}]); setPanel('skills'); }
-  else if(lower.includes('sell')){ addMsg('bot','Sell on the internal market. Listings settle at 3.3%.',[{label:'Create listing',intent:'open_sell'}]); setPanel('sell'); }
-  else if(lower.includes('agent')||lower.includes('api')){ addMsg('bot','Agents use structured actions at machine speed.',[{label:'Agent API',intent:'open_agent'}]); setPanel('agent'); }
-  else { addMsg('bot','I can help you shop auctions, equip skills, or list inventory.',[{label:'Open markets',intent:'open_markets'},{label:'Skills',intent:'open_skills'}]); setPanel('markets'); }
+  if(lower.includes('skill')){addMsg('bot','Opening skills — equip power-ups that bargain, watch prices, and work for you.',[{label:'Browse skills',intent:'open_skills'}]);setPanel('skills');}
+  else if(lower.includes('sell')){addMsg('bot','Sell on the internal market. Listings settle at 3.3%.',[{label:'Create listing',intent:'open_sell'}]);setPanel('sell');}
+  else if(lower.includes('agent')||lower.includes('api')){addMsg('bot','Agents use structured actions at machine speed.',[{label:'Agent API',intent:'open_agent'}]);setPanel('agent');}
+  else{addMsg('bot','I can help you shop auctions, equip skills, or list inventory.',[{label:'Open markets',intent:'open_markets'},{label:'Skills',intent:'open_skills'}]);setPanel('markets');}
 };
 document.getElementById('input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('send').click();});
 addMsg('bot','Welcome to LVL — humans converse, agents act. What do you want to do?',[
   {label:'Shop markets',intent:'open_markets'},{label:'Equip skills',intent:'open_skills'},{label:'Sell',intent:'open_sell'}
 ]);
-refresh(); setPanel('markets');
+refresh();setPanel('markets');
 </script>
 </body>
 </html>
