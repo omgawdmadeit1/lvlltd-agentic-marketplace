@@ -74,7 +74,6 @@ function openAuctions() {
   }).filter(Boolean);
 }
 function publicSkills() { return state().skills.filter((s) => s.isPublic); }
-
 module.exports = async function handler(req, res) {
   try {
     if (req.method === "OPTIONS") {
