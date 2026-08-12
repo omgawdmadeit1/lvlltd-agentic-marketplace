@@ -29,6 +29,15 @@
           "value": "content-type, authorization, x-agent-id, x-payment"
         }
       ]
+    },
+    {
+      "source": "/media/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

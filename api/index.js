@@ -34,15 +34,27 @@ function state() {
   }
   return g.__lvlMarketEngine;
 }
+function meView() {
+  const s = state();
+  return {
+    ...s.me,
+    balance_usdc: s.me.balanceUsdc,
+    balanceUsdc: s.me.balanceUsdc,
+    equipped_skills: s.me.equippedSkills,
+    owned_skill_ids: s.ownedSkillIds.slice(),
+  };
+}
 const ACTIONS = [
   { name: "get_marketplace_description", method: "GET", path: "/api/agent" },
   { name: "get_action_catalog", method: "GET", path: "/api/actions" },
   { name: "list_open_auctions", method: "GET", path: "/api/auctions?status=open" },
+  { name: "list_active_listings", method: "GET", path: "/api/listings" },
   { name: "create_listing", method: "POST", path: "/api/listings", body: { title: "string", price_usdc: "number" } },
   { name: "place_bid", method: "POST", path: "/api/auctions/{id}/bids", body: { amount_usdc: "number" } },
   { name: "get_skill_catalog", method: "GET", path: "/api/skills" },
   { name: "purchase_skill", method: "POST", path: "/api/skills/{id}/purchase" },
   { name: "equip_skill", method: "POST", path: "/api/agents/me/skills/equip", body: { skill_id: "string" } },
+  { name: "get_me", method: "GET", path: "/api/me" },
   { name: "get_my_orders", method: "GET", path: "/api/orders" },
 ];
 function send(res, status, data) {
@@ -86,18 +98,17 @@ module.exports = async function handler(req, res) {
     const host = req.headers.host || "localhost";
     const url = new URL(req.url || "/", `https://${host}`);
     let path = url.pathname || "/";
-    if (path === "/api/index" || path === "/api/index.js") path = "/api/agent";
-    else if (path === "/") {
+    // Path guard: machine API only under /api/*
+    if (!path.startsWith("/api")) {
       return send(res, 404, { ok: false, error: "not_an_api_route", hint: "Human UI is at /. Agent entry is GET /api/agent" });
-    } else if (!path.startsWith("/api")) {
-      path = "/api" + (path.startsWith("/") ? path : "/" + path);
     }
+    if (path === "/api/index" || path === "/api/index.js") path = "/api/agent";
     const m = (req.method || "GET").toUpperCase();
     const body = m === "POST" || m === "PUT" || m === "PATCH" ? await readBody(req) : {};
     const s = state();
     if (m === "GET" && (path === "/api/agent" || path === "/api")) {
       return send(res, 200, {
-        name: "LVL — Agentic Marketplace", domain: "agentic.lvlltd.com", version: "1.3.0",
+        name: "LVL — Agentic Marketplace", domain: "agentic.lvlltd.com", version: "1.3.1",
         fee_rate: PLATFORM_FEE_RATE, fee_note: "3.3% platform fee on internal trades and skill purchases",
         surfaces: { human: "Conversation-first progressive UI", agent: "Self-describing machine interface" },
         market_mechanisms: ["english_auction","vickrey_auction","fixed_price","bargain","trade_barter","price_matching"],
@@ -110,51 +121,75 @@ module.exports = async function handler(req, res) {
     }
     if (m === "GET" && path === "/api/actions") return send(res, 200, { actions: ACTIONS, fee_rate: PLATFORM_FEE_RATE });
     if (m === "GET" && path === "/api/openapi.json") {
-      return send(res, 200, { openapi: "3.1.0", info: { title: "LVL Agentic Marketplace", version: "1.3.0" }, paths: Object.fromEntries(ACTIONS.map((a) => [a.path.split("?")[0], { [a.method.toLowerCase()]: { summary: a.name } }])) });
+      return send(res, 200, { openapi: "3.1.0", info: { title: "LVL Agentic Marketplace", version: "1.3.1" }, paths: Object.fromEntries(ACTIONS.map((a) => [a.path.split("?")[0], { [a.method.toLowerCase()]: { summary: a.name } }])) });
     }
+    if (m === "GET" && path === "/api/me") return send(res, 200, { ok: true, me: meView(), balance_usdc: s.me.balanceUsdc });
     if (m === "GET" && path === "/api/auctions") return send(res, 200, { auctions: openAuctions(), fee_rate: PLATFORM_FEE_RATE });
     if (m === "GET" && path === "/api/listings") return send(res, 200, { listings: s.listings.filter((l) => l.status === "active") });
     if (m === "POST" && path === "/api/listings") {
       const title = String(body.title || "").trim();
       const price = Number(body.price_usdc);
-      if (!title || !Number.isFinite(price)) return send(res, 400, { ok: false, error: "invalid_listing" });
+      if (!title || !Number.isFinite(price) || price <= 0) return send(res, 400, { ok: false, error: "invalid_listing" });
       const listing = { id: uid("lst"), title, description: body.description || title, type: body.type || "digital", pricingMode: body.pricing_mode || "fixed", priceUsdc: price, status: "active", sellerId: s.me.id, createdAt: new Date().toISOString() };
       s.listings.unshift(listing);
-      return send(res, 200, { ok: true, listing });
+      const order = { id: uid("ord"), kind: "listing_created", listingId: listing.id, amountUsdc: price, feeUsdc: feeOf(price), status: "listed", createdAt: new Date().toISOString() };
+      s.orders.unshift(order);
+      return send(res, 200, { ok: true, listing, fee_estimate_usdc: feeOf(price) });
     }
     const bidMatch = path.match(/^\/api\/auctions\/([^/]+)\/bids$/);
     if (m === "POST" && bidMatch) {
       const auction = s.auctions.find((a) => a.id === bidMatch[1]);
       if (!auction || auction.status !== "open") return send(res, 404, { ok: false, error: "auction_not_found" });
       const amount = Number(body.amount_usdc);
-      if (!Number.isFinite(amount) || amount <= (auction.highBidUsdc || 0)) return send(res, 400, { ok: false, error: "invalid_bid" });
+      const min = (auction.highBidUsdc || 0) + (auction.minIncrementUsdc || 0.5);
+      if (!Number.isFinite(amount) || amount < min) return send(res, 400, { ok: false, error: "invalid_bid", min_amount_usdc: min });
       auction.highBidUsdc = amount;
       const bid = { id: uid("bid"), auctionId: auction.id, amountUsdc: amount, agentId: s.me.id, createdAt: new Date().toISOString() };
       s.bids.unshift(bid);
       return send(res, 200, { ok: true, bid, auction, fee_if_won: feeOf(amount) });
     }
-    if (m === "GET" && path === "/api/skills") return send(res, 200, { skills: publicSkills().map((x) => ({ ...x, price_usdc: x.priceUsdc })), hidden_preserved_247: 247 });
+    if (m === "GET" && path === "/api/skills") {
+      return send(res, 200, {
+        skills: publicSkills().map((x) => ({
+          ...x,
+          price_usdc: x.priceUsdc,
+          owned: s.ownedSkillIds.includes(x.id),
+          equipped: s.me.equippedSkills.includes(x.id),
+        })),
+        hidden_preserved_247: 247,
+        owned_skill_ids: s.ownedSkillIds.slice(),
+        equipped_skills: s.me.equippedSkills.slice(),
+      });
+    }
     const purchaseMatch = path.match(/^\/api\/skills\/([^/]+)\/purchase$/);
     if (m === "POST" && purchaseMatch) {
       const skill = s.skills.find((x) => x.id === purchaseMatch[1] && x.isPublic);
       if (!skill) return send(res, 404, { ok: false, error: "skill_not_found" });
+      if (s.ownedSkillIds.includes(skill.id)) return send(res, 200, { ok: true, already_owned: true, balance_usdc: s.me.balanceUsdc, skill_id: skill.id });
       const fee = feeOf(skill.priceUsdc);
       const total = skill.priceUsdc + fee;
-      if (s.me.balanceUsdc < total) return send(res, 400, { ok: false, error: "insufficient_balance", need: total });
+      if (s.me.balanceUsdc < total) return send(res, 400, { ok: false, error: "insufficient_balance", need: total, balance_usdc: s.me.balanceUsdc });
       s.me.balanceUsdc = Math.round((s.me.balanceUsdc - total) * 100) / 100;
-      if (!s.ownedSkillIds.includes(skill.id)) s.ownedSkillIds.push(skill.id);
-      const order = { id: uid("ord"), kind: "skill_purchase", skillId: skill.id, amountUsdc: skill.priceUsdc, feeUsdc: fee, createdAt: new Date().toISOString() };
+      s.ownedSkillIds.push(skill.id);
+      const order = { id: uid("ord"), kind: "skill_purchase", skillId: skill.id, amountUsdc: skill.priceUsdc, feeUsdc: fee, status: "paid", createdAt: new Date().toISOString() };
       s.orders.unshift(order);
-      return send(res, 200, { ok: true, order, balance_usdc: s.me.balanceUsdc });
+      return send(res, 200, { ok: true, order, balance_usdc: s.me.balanceUsdc, owned_skill_ids: s.ownedSkillIds });
     }
     if (m === "POST" && path === "/api/agents/me/skills/equip") {
       const skillId = body.skill_id;
+      if (!skillId) return send(res, 400, { ok: false, error: "skill_id_required" });
       if (!s.ownedSkillIds.includes(skillId)) return send(res, 400, { ok: false, error: "not_owned" });
       if (!s.me.equippedSkills.includes(skillId)) s.me.equippedSkills.push(skillId);
-      return send(res, 200, { ok: true, equipped: s.me.equippedSkills });
+      return send(res, 200, { ok: true, equipped: s.me.equippedSkills, me: meView() });
     }
-    if (m === "GET" && path === "/api/orders") return send(res, 200, { orders: s.orders.map((o) => ({ ...o, amount_usdc: o.amountUsdc, platform_fee_usdc: o.feeUsdc, status: o.status || "paid" })), balance_usdc: s.me.balanceUsdc, me: { ...s.me, balance_usdc: s.me.balanceUsdc, balanceUsdc: s.me.balanceUsdc } });
-    if (m === "GET" && path === "/api/health") return send(res, 200, { ok: true, service: "LVL Agentic Marketplace", version: "1.3.0", bot_entry: "/api/agent" });
+    if (m === "GET" && path === "/api/orders") {
+      return send(res, 200, {
+        orders: s.orders.map((o) => ({ ...o, amount_usdc: o.amountUsdc, platform_fee_usdc: o.feeUsdc, status: o.status || "paid" })),
+        balance_usdc: s.me.balanceUsdc,
+        me: meView(),
+      });
+    }
+    if (m === "GET" && path === "/api/health") return send(res, 200, { ok: true, service: "LVL Agentic Marketplace", version: "1.3.1", bot_entry: "/api/agent" });
     return send(res, 404, { ok: false, error: "not_found", path, hint: "GET /api/agent" });
   } catch (err) {
     return send(res, 500, { ok: false, error: "internal", message: String(err && err.message ? err.message : err) });
