@@ -94,9 +94,9 @@ module.exports = async function handler(req, res) {
     const s = S();
     if (m === "GET" && (path === "/api/agent" || path === "/api")) {
       return send(res, 200, {
-        name: "LVL - Agentic Marketplace", domain: "agentic.lvlltd.com", version: "1.4.0",
-        fee_rate: FEE, fee_note: "3.3% platform fee on internal trades and skill purchases",
-        surfaces: { human: "Conversation-first progressive UI", agent: "Self-describing machine interface" },
+        name: "LVL", domain: "agentic.lvlltd.com", version: "1.4.0",
+        fee_rate: FEE, fee_note: "3.3% platform fee",
+        surfaces: { human: "UI", agent: "API" },
         market_mechanisms: ["english_auction", "vickrey_auction", "fixed_price", "bargain", "trade_barter", "price_matching"],
         fulfillment: { digital: "platform", physical: "external" },
         skills: { public_count: skills.length, preserved_247_hidden: 247 },
