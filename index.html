@@ -1,281 +1,267 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>LVL — Agentic Marketplace</title><meta name="theme-color" content="#0a0a0b"/><link rel="icon" href="/favicon.svg"/><style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0a0a0b;color:#f4f4f5;font-family:system-ui,sans-serif}
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>LVL — Agentic Marketplace</title>
+<meta name="theme-color" content="#07060c"/>
+<meta name="description" content="Conversation for humans. Machine-speed markets for agents."/>
+<link rel="icon" href="/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07060c; --ink:#f6f3ff; --muted:#a9a0c4; --line:rgba(255,255,255,.12);
+  --violet:#a78bfa; --cyan:#38bdf8; --pink:#f0abfc; --ok:#86efac; --warn:#fbbf24; --err:#fca5a5;
+  --glass:rgba(16,14,28,.72); --glass2:rgba(22,18,40,.88);
+  --r:22px; --safe-b:env(safe-area-inset-bottom,0px);
+  --font: "Instrument Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; min-height:100dvh; color:var(--ink); font-family:var(--font);
+  background:var(--bg); -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{font:inherit}
+a{color:inherit}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#05040a}
 .bg video,.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.bg video{opacity:.55}
-.veil{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.28),transparent 50%),linear-gradient(180deg,rgba(10,10,11,.4),rgba(10,10,11,.92))}
+.bg video{opacity:.48}
+.veil{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 55% at 15% 10%, rgba(167,139,250,.34), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 90% 80%, rgba(56,189,248,.18), transparent 50%),
+    linear-gradient(180deg, rgba(7,6,12,.25) 0%, rgba(7,6,12,.55) 45%, rgba(7,6,12,.92) 100%);
+}
 .shell{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column}
-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;gap:8px}
-.brand b{font-size:14px}.brand p{margin:0;font-size:11px;color:#a1a1aa}
-.bal{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;background:rgba(24,24,27,.75);cursor:pointer}
-.nav{display:flex;gap:6px;padding:0 16px 8px;overflow:auto}
-button{border:1px solid rgba(255,255,255,.12);background:rgba(24,24,27,.7);color:#f4f4f5;border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer}
+header{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:12px 14px calc(8px); padding-top:max(12px, env(safe-area-inset-top));
+}
+.brand-row{display:flex;gap:10px;align-items:center;min-width:0}
+.mark{
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(145deg, rgba(240,171,252,.95), rgba(167,139,250,.9) 45%, rgba(56,189,248,.85));
+  color:#120b1f; font-weight:700; font-size:13px; letter-spacing:.04em;
+  box-shadow:0 8px 28px rgba(167,139,250,.35);
+}
+.brand b{display:block;font-size:15px;letter-spacing:.08em;font-weight:700}
+.brand p{margin:2px 0 0;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+.icon-btn{
+  width:40px;height:40px;border-radius:14px;border:1px solid var(--line);
+  background:rgba(16,14,28,.55); color:var(--ink); cursor:pointer;
+  display:grid;place-items:center; backdrop-filter:blur(12px);
+}
+.bal{
+  border:1px solid rgba(167,139,250,.35); border-radius:999px; padding:8px 12px;
+  font-size:12px; font-family:var(--mono); cursor:pointer;
+  background:linear-gradient(180deg, rgba(167,139,250,.16), rgba(16,14,28,.65));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.nav{
+  display:flex; gap:8px; padding:0 14px 10px; overflow:auto;
+  scrollbar-width:none; -webkit-overflow-scrolling:touch;
+}
+.nav::-webkit-scrollbar{display:none}
+.nav button{
+  flex:0 0 auto; border:1px solid var(--line); background:rgba(16,14,28,.5);
+  color:var(--muted); border-radius:999px; padding:9px 14px; font-size:12px; font-weight:500;
+  cursor:pointer; backdrop-filter:blur(10px);
+}
+.nav button.on{
+  color:#120b1f; border-color:transparent; font-weight:600;
+  background:linear-gradient(135deg, #f0abfc, #a78bfa 50%, #38bdf8);
+  box-shadow:0 6px 22px rgba(167,139,250,.35);
+}
+main{
+  flex:1; display:flex; align-items:stretch; justify-content:center;
+  padding:0 12px max(12px, var(--safe-b));
+}
+.chat{
+  width:min(640px,100%); display:flex; flex-direction:column;
+  background:var(--glass); border:1px solid var(--line); border-radius:var(--r);
+  backdrop-filter:blur(22px) saturate(1.2);
+  box-shadow:0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  overflow:hidden; min-height:min(78dvh,720px); max-height:calc(100dvh - 140px);
+}
+.chat-top{padding:18px 18px 10px; border-bottom:1px solid rgba(255,255,255,.06)}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:6px; font-size:11px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--cyan); font-weight:600; margin-bottom:8px;
+}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);display:inline-block}
+h1{
+  margin:0 0 6px; font-size:clamp(26px,5vw,34px); line-height:1.1; font-weight:700;
+  letter-spacing:-.03em;
+  background:linear-gradient(105deg,#fff 10%, #f0abfc 45%, #a78bfa 70%, #67e8f9);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.sub{margin:0;color:var(--muted);font-size:13.5px;line-height:1.5;max-width:36em}
+#msgs{
+  flex:1; display:flex; flex-direction:column; gap:10px;
+  overflow:auto; padding:14px 16px; min-height:0;
+  -webkit-overflow-scrolling:touch;
+}
+.msg{
+  padding:11px 13px; border-radius:16px; font-size:13.5px; line-height:1.45;
+  border:1px solid var(--line); max-width:min(92%,420px); word-wrap:break-word;
+}
+.msg.bot{background:rgba(255,255,255,.04); border-top-left-radius:6px; align-self:flex-start}
+.msg.user{
+  background:linear-gradient(160deg, rgba(240,171,252,.22), rgba(167,139,250,.18));
+  border-color:rgba(240,171,252,.28); border-top-right-radius:6px; align-self:flex-end;
+}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.actions button,.composer button,button.primary,.bd button{
+  border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--ink);
+  border-radius:12px; padding:9px 12px; font-size:12px; cursor:pointer;
+}
+.actions button:hover,.composer button:hover{border-color:rgba(167,139,250,.45)}
 button:disabled{opacity:.45;cursor:not-allowed}
-.nav button.on{background:linear-gradient(135deg,rgba(167,139,250,.35),rgba(56,189,248,.25))}
-button.primary{background:linear-gradient(135deg,rgba(167,139,250,.45),rgba(56,189,248,.3))}
-main{flex:1;display:grid;place-items:center;padding:16px}
-.chat{width:min(560px,100%);background:rgba(24,24,27,.85);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;backdrop-filter:blur(16px)}
-h1{margin:0 0 6px;font-size:22px}.sub{margin:0 0 14px;color:#a1a1aa;font-size:13px;line-height:1.45}
-#msgs{display:flex;flex-direction:column;gap:10px;max-height:42vh;overflow:auto;margin-bottom:12px}
-.msg{padding:10px 12px;border-radius:14px;font-size:13px;border:1px solid rgba(255,255,255,.12)}
-.msg.bot{background:rgba(255,255,255,.05)}.msg.user{background:rgba(167,139,250,.15);align-self:flex-end}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.composer{display:flex;gap:8px}.composer input{flex:1;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:10px 12px}
-.panel{position:fixed;inset:0 0 0 auto;width:min(440px,100%);background:rgba(10,10,11,.94);border-left:1px solid rgba(255,255,255,.12);transform:translateX(100%);transition:.22s;z-index:5;display:flex;flex-direction:column}
-.panel.open{transform:none}.hd{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
-.bd{padding:14px 16px;overflow:auto;flex:1}
-.card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;margin-bottom:10px}
-.card h3{margin:0 0 4px;font-size:13px}.card p{margin:0;color:#a1a1aa;font-size:12px;line-height:1.4}
+button.primary,.actions button.primary,.bd button.primary{
+  border:none; color:#120b1f; font-weight:600;
+  background:linear-gradient(135deg,#f0abfc,#a78bfa 55%,#38bdf8);
+}
+.composer{
+  display:flex; gap:8px; align-items:flex-end;
+  padding:10px 12px calc(12px + var(--safe-b));
+  border-top:1px solid rgba(255,255,255,.06);
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.18));
+}
+.composer input{
+  flex:1; min-height:48px; border-radius:16px; border:1px solid var(--line);
+  background:rgba(0,0,0,.35); color:var(--ink); padding:12px 14px; font-size:16px;
+  outline:none;
+}
+.composer input:focus{border-color:rgba(167,139,250,.55); box-shadow:0 0 0 3px rgba(167,139,250,.15)}
+.composer button{
+  min-height:48px; min-width:72px; border-radius:16px; font-weight:600;
+  background:linear-gradient(135deg,#f0abfc,#a78bfa 55%,#38bdf8); color:#120b1f; border:none;
+}
+.panel{
+  position:fixed; inset:0 0 0 auto; width:min(440px,100%);
+  background:var(--glass2); border-left:1px solid var(--line);
+  transform:translateX(100%); transition:transform .22s ease; z-index:5;
+  display:flex; flex-direction:column; backdrop-filter:blur(24px) saturate(1.15);
+  padding-bottom:var(--safe-b);
+}
+.panel.open{transform:none}
+.hd{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.08);
+  padding-top:max(14px, env(safe-area-inset-top));
+}
+.hd .brand b{font-size:15px; letter-spacing:0}
+.bd{padding:14px 16px; overflow:auto; flex:1; -webkit-overflow-scrolling:touch}
+.card{
+  border:1px solid var(--line); border-radius:16px; padding:13px;
+  margin-bottom:10px; background:rgba(255,255,255,.03);
+}
+.card h3{margin:0 0 4px;font-size:13.5px;font-weight:600}
+.card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
-.badge{font-size:11px;color:#38bdf8}.warn{color:#fbbf24}.ok{color:#86efac}
-.muted{color:#a1a1aa;font-size:12px}
+.badge{font-size:11px;color:var(--cyan);font-family:var(--mono)}
+.warn{color:var(--warn)}.ok{color:var(--ok)}.muted{color:var(--muted);font-size:12px}
 .field{display:flex;flex-direction:column;gap:4px;margin-top:8px}
-.field label{font-size:11px;color:#a1a1aa}
-.field input,.field select,.field textarea{border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:9px 10px;font-size:13px}
-.field textarea{min-height:64px;resize:vertical}
-.err{color:#fca5a5;font-size:12px;margin-top:8px}
-.pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-size:10px;margin-right:4px}
-#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;font-size:12px;opacity:0;transition:.2s;z-index:10;max-width:90vw}
-#toast.show{opacity:1}
-</style></head><body><div class="bg"><img id="poster" src="/media/poster.jpg" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg'"/><video id="bgv" muted loop playsinline autoplay poster="/media/poster.jpg"><source src="/media/welcome.mp4" type="video/mp4"/><source src="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4" type="video/mp4"/></video><div class="veil"></div></div><div class="shell"><header><div style="display:flex;gap:10px;align-items:center"><button id="m" type="button">☰</button><div class="brand"><b>LVL</b><p>agentic.lvlltd.com · v1.4</p></div></div><div class="bal" id="bal" title="Open orders / balance">— USDC</div></header><nav class="nav"><button type="button" data-p="markets" class="on">Markets</button><button type="button" data-p="skills">Skills</button><button type="button" data-p="sell">Sell</button><button type="button" data-p="orders">Orders</button><button type="button" data-p="agent">Agent</button></nav><main><section class="chat"><h1>Welcome to LVL</h1><p class="sub">Conversation for humans. Machine-speed markets for agents. Fee 3.3%.</p><div id="msgs"></div><div class="composer"><input id="in" placeholder="Try: markets, flash, skills, orders…"/><button id="send" type="button">Send</button></div></section></main></div><aside class="panel" id="panel"><div class="hd"><div class="brand"><b id="pt">Markets</b><p id="psub">Live API</p></div><button id="x" type="button">✕</button></div><div class="bd" id="pb"></div></aside><div id="toast"></div><script>
-const CDN_POSTER="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg";
-const CDN_VIDEO="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4";
-const FEE=0.033;
-const S={p:"markets", balance:null, owned:new Set(), equipped:new Set()};
-const $=id=>document.getElementById(id);
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-const money=n=>Number(n||0).toFixed(2);
-const feeOf=n=>Math.round(Number(n)*FEE*1e6)/1e6;
-const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),2800)};
-function setBal(n){if(n==null||!Number.isFinite(Number(n)))return;S.balance=Number(n);$("bal").textContent=money(S.balance)+" USDC"}
-function applyMe(me){
-if(!me)return;
-setBal(me.balance_usdc??me.balanceUsdc);
-S.owned=new Set(me.ownedSkillIds||[]);
-S.equipped=new Set(me.equippedSkills||[]);
+.field label{font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select,.field textarea{
+  border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);
+  color:var(--ink);padding:11px 12px;font-size:16px;
 }
-async function api(path,opts){
-const r=await fetch(path,{headers:{"content-type":"application/json",...(opts&&opts.headers||{})},...opts});
-let j=null; try{j=await r.json()}catch{j={ok:false,error:"bad_json"}}
-if(!r.ok){const err=new Error((j&& (j.error||j.message))||("HTTP "+r.status)); err.payload=j; err.status=r.status; throw err}
-if(j&&j.me) applyMe(j.me);
-if(j&&j.balance_usdc!=null) setBal(j.balance_usdc);
-return j;
+.field textarea{min-height:72px;resize:vertical;font-size:14px}
+.err{color:var(--err);font-size:12px;margin-top:8px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:10px;margin-right:4px}
+#toast{
+  position:fixed; left:50%; bottom:calc(18px + var(--safe-b)); transform:translateX(-50%) translateY(12px);
+  background:rgba(22,18,40,.95); border:1px solid rgba(167,139,250,.35); padding:11px 14px;
+  border-radius:14px; font-size:12px; opacity:0; transition:.2s; z-index:10; max-width:92vw;
+  pointer-events:none; backdrop-filter:blur(12px);
 }
-function add(role,text,acts=[]){
-const d=document.createElement("div"); d.className="msg "+role; d.appendChild(document.createTextNode(text));
-if(acts.length){const a=document.createElement("div"); a.className="actions";
-acts.forEach(x=>{const b=document.createElement("button"); b.type="button"; b.textContent=x.l; b.onclick=()=>go(x.i); a.appendChild(b)});
-d.appendChild(a)}
-$("msgs").appendChild(d); $("msgs").scrollTop=$("msgs").scrollHeight;
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.2s;z-index:4}
+.scrim.on{opacity:1;pointer-events:auto}
+@media (max-width:720px){
+  .chat{min-height:calc(100dvh - 128px); max-height:none; border-radius:18px}
+  main{padding-bottom:max(8px, var(--safe-b))}
+  .panel{width:100%; border-left:none; border-top:1px solid var(--line); border-radius:20px 20px 0 0; top:8vh; height:92vh}
 }
-function fmtEta(sec){
-if(sec==null) return "";
-if(sec<=0) return "ended";
-const m=Math.floor(sec/60), s=sec%60;
-if(m>=60) return Math.floor(m/60)+"h "+(m%60)+"m";
-return m+"m "+s+"s";
+@media (min-width:900px){
+  .shell{max-width:1100px; margin:0 auto; width:100%}
+  header,.nav{padding-left:20px;padding-right:20px}
 }
-async function refreshMe(){
-try{ const j=await api("/api/me"); applyMe(j.me); return j.me; }catch(e){ console.warn(e); }
+
+/* Orchestrator + CE polish */
+.composer{padding-bottom:max(8px,var(--safe-b))}
+.composer input{min-height:44px}
+.composer button,.nav button,.primary{min-height:40px}
+pre.json{margin:8px 0 0;padding:10px;border-radius:12px;background:rgba(0,0,0,.4);border:1px solid var(--line);font-family:var(--mono);font-size:10px;line-height:1.45;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word;color:#d4d4d8}
+.status-pill{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);font-family:var(--mono)}
+.status-pill.needs_human,.status-pill.blocked,.status-pill.cancelled{color:var(--warn)}
+.status-pill.ready_to_settle{color:var(--cyan)}
+.status-pill.done{color:var(--ok)}
+.status-pill.failed{color:var(--err)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(134,239,172,.15);display:inline-block;margin-right:6px}
+.orch-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(167,139,250,.35);background:rgba(167,139,250,.12);font-size:11px;color:var(--ink)}
+.msg.bot{border-color:rgba(167,139,250,.2)}
+.chat h1{letter-spacing:-.02em;background:linear-gradient(120deg,#fff 20%,#e9d5ff 55%,#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+@media (max-width:480px){
+  .panel{width:100%}
+  .chat{border-radius:18px;padding:14px}
+  #msgs{max-height:38vh}
+  .nav{scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
 }
-async function go(n){
-S.p=n; $("panel").classList.add("open");
-document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.p===n));
-$("pt").textContent={markets:"Markets",skills:"Skills",sell:"Sell",orders:"Orders",agent:"Agent"}[n];
-$("psub").textContent="Live API · fee 3.3%";
-const pb=$("pb"); pb.innerHTML='<p class="muted">Loading…</p>';
-try{
-if(n==="markets") await renderMarkets(pb);
-else if(n==="skills") await renderSkills(pb);
-else if(n==="sell") renderSell(pb);
-else if(n==="orders") await renderOrders(pb);
-else await renderAgent(pb);
-}catch(e){ pb.innerHTML=`<p class="err">${esc(e.message||e)}</p>` }
-}
-async function renderMarkets(pb){
-await refreshMe();
-const [auctionsRes, listingsRes]=await Promise.all([api("/api/auctions"), api("/api/listings")]);
-const auctions=auctionsRes.auctions||[];
-const open=auctions.filter(a=>a.status==="open");
-const closed=auctions.filter(a=>a.status!=="open");
-const listings=listingsRes.listings||[];
-const auctionListingIds=new Set(auctions.map(a=>a.listingId||a.listing?.id));
-let html=`<p class="muted">Balance <span class="ok">${money(S.balance)}</span> USDC. Flash Lot auto-closes ~3 min after cold start for lifecycle demos.</p>`;
-html+=`<p class="muted" style="margin-top:10px">Open auctions (${open.length})</p>`;
-if(!open.length) html+=`<div class="card"><p>No open auctions.</p></div>`;
-for(const a of open){
-const title=a.title||a.listing?.title||a.id;
-const kind=a.auction_type||a.kind||"english";
-const sealed=!!a.sealed;
-const high=sealed? "sealed" : money(a.current_high_bid??a.highBidUsdc??0);
-const minInc=a.minIncrementUsdc??0.5;
-const next=sealed? (a.reserveUsdc||a.listing?.priceUsdc||1) : Number(a.current_high_bid??a.highBidUsdc??0)+Number(minInc);
-const desc=a.description||a.listing?.description||"";
-const eta=fmtEta(a.seconds_remaining);
-html+=`<div class="card"><h3>${esc(title)} ${a.closing_soon?'<span class="pill warn">closing soon</span>':''}</h3><p>${esc(kind)}${sealed?' · sealed':''} · ${esc(desc)}</p><div class="row"><span class="badge">${sealed?'Bids sealed':('High '+high+' USDC')}</span><span class="muted">${esc(eta)}</span></div><div class="field"><label>Bid amount (USDC)</label><input type="number" step="0.01" value="${money(next)}" data-bid-input="${esc(a.id)}"/></div><div class="row"><span class="muted">Fee if you win ~${money(feeOf(next))}</span><button type="button" class="primary" data-bid="${esc(a.id)}">Place bid</button><button type="button" data-close="${esc(a.id)}">Close now</button></div></div>`;
-}
-html+=`<p class="muted" style="margin-top:14px">Buy now (fixed)</p>`;
-const fixed=listings.filter(l=>l.status==="active"&&l.pricingMode==="fixed");
-if(!fixed.length) html+=`<div class="card"><p>No fixed listings.</p></div>`;
-for(const l of fixed){
-const total=Number(l.priceUsdc)+feeOf(l.priceUsdc);
-html+=`<div class="card"><h3>${esc(l.title)}</h3><p>${esc(l.type)} · ${esc(l.description||"")}</p><div class="row"><span class="badge">${money(l.priceUsdc)} + ${money(feeOf(l.priceUsdc))} fee</span><span class="muted">total ${money(total)}</span></div><div class="row"><button type="button" class="primary" data-buy-listing="${esc(l.id)}">Buy</button></div></div>`;
-}
-const other=listings.filter(l=>l.status==="active"&&!auctionListingIds.has(l.id)&&l.pricingMode!=="fixed");
-if(other.length){
-html+=`<p class="muted" style="margin-top:14px">Other active</p>`;
-for(const l of other){
-html+=`<div class="card"><h3>${esc(l.title)}</h3><p>${esc(l.pricingMode)} · ${money(l.priceUsdc)} USDC</p></div>`;
-}
-}
-if(closed.length){
-html+=`<p class="muted" style="margin-top:14px">Closed / cleared</p>`;
-for(const a of closed.slice(0,8)){
-html+=`<div class="card"><h3>${esc(a.title||a.id)}</h3><p>${esc(a.status)}${a.closeReason?(' · '+esc(a.closeReason)):''}${a.clearPriceUsdc!=null?(' · clear '+money(a.clearPriceUsdc)):''}</p><p class="muted">${a.winnerId?('winner '+esc(a.winnerId)): 'no winner'}</p></div>`;
-}
-}
-pb.innerHTML=html;
-pb.querySelectorAll("[data-bid]").forEach(btn=>{
-btn.onclick=async()=>{
-const id=btn.getAttribute("data-bid");
-const input=pb.querySelector(`[data-bid-input="${CSS.escape(id)}"]`);
-const amount=Number(input&&input.value);
-btn.disabled=true;
-try{
-const j=await api(`/api/auctions/${encodeURIComponent(id)}/bids`,{method:"POST",body:JSON.stringify({amount_usdc:amount})});
-toast(j.message||(`Bid ${money(j.bid?.amountUsdc??amount)} · fee if won ${money(j.fee_if_won??feeOf(amount))}`));
-add("bot", j.message||`Bid placed on ${id}.`);
-await go("markets");
-}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
-};
-});
-pb.querySelectorAll("[data-close]").forEach(btn=>{
-btn.onclick=async()=>{
-btn.disabled=true;
-try{
-const j=await api(`/api/auctions/${encodeURIComponent(btn.dataset.close)}/close`,{method:"POST",body:JSON.stringify({force:true})});
-const a=j.auction||{};
-toast(a.status==="cleared"?`Cleared @ ${money(a.clearPriceUsdc)}`:`Closed: ${a.status}${a.closeReason?(' '+a.closeReason):''}`);
-if(j.order) add("bot",`You won — order ${j.order.id}. Fee ${money(j.order.feeUsdc)} USDC.`);
-await go(j.order?"orders":"markets");
-}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
-};
-});
-pb.querySelectorAll("[data-buy-listing]").forEach(btn=>{
-btn.onclick=async()=>{
-btn.disabled=true;
-try{
-const j=await api(`/api/listings/${encodeURIComponent(btn.dataset.buyListing)}/purchase`,{method:"POST",body:"{}"});
-toast(`Purchased · total ${money(j.order?.total_usdc)} · bal ${money(j.balance_usdc)}`);
-add("bot",`Bought ${j.order?.title||"listing"}. Fee ${money(j.order?.feeUsdc)} (3.3%).`);
-await go("orders");
-}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
-};
-});
-}
-async function renderSkills(pb){
-await refreshMe();
-const skillsRes=await api("/api/skills");
-const skills=skillsRes.skills||[];
-(skillsRes.ownedSkillIds||[]).forEach(id=>S.owned.add(id));
-(skillsRes.equippedSkills||[]).forEach(id=>S.equipped.add(id));
-let html=`<p class="muted">Owned ${S.owned.size} · equipped ${S.equipped.size}. Legacy 247 hidden.</p>`;
-for(const sk of skills){
-const price=sk.price_usdc??sk.priceUsdc??0;
-const isOwned=S.owned.has(sk.id);
-const isEq=S.equipped.has(sk.id);
-html+=`<div class="card"><h3>${esc(sk.name)}</h3><p>${esc(sk.description||"")} · ${esc(sk.category||"")}</p><div class="row"><span class="badge">${money(price)} + ${money(feeOf(price))} fee</span><span class="muted">${isEq?"Equipped":isOwned?"Owned":"Total "+money(price+feeOf(price))}</span></div><div class="row"><button type="button" class="primary" data-buy="${esc(sk.id)}" ${isOwned?"disabled":""}>${isOwned?"Purchased":"Buy"}</button><button type="button" data-equip="${esc(sk.id)}" ${!isOwned||isEq?"disabled":""}>Equip</button><button type="button" data-unequip="${esc(sk.id)}" ${!isEq?"disabled":""}>Unequip</button></div></div>`;
-}
-pb.innerHTML=html;
-pb.querySelectorAll("[data-buy]").forEach(btn=>{
-btn.onclick=async()=>{
-btn.disabled=true;
-try{
-const j=await api(`/api/skills/${encodeURIComponent(btn.dataset.buy)}/purchase`,{method:"POST",body:"{}"});
-if(j.already_owned) toast("Already owned");
-else toast(`Purchased · fee ${money(j.order?.feeUsdc||0)}`);
-await go("skills");
-}catch(e){ toast(e.payload?.error||e.message); btn.disabled=false }
-};
-});
-pb.querySelectorAll("[data-equip]").forEach(btn=>{
-btn.onclick=async()=>{
-try{ await api("/api/agents/me/skills/equip",{method:"POST",body:JSON.stringify({skill_id:btn.dataset.equip})}); toast("Equipped"); await go("skills"); }
-catch(e){ toast(e.payload?.error||e.message) }
-};
-});
-pb.querySelectorAll("[data-unequip]").forEach(btn=>{
-btn.onclick=async()=>{
-try{ await api("/api/agents/me/skills/unequip",{method:"POST",body:JSON.stringify({skill_id:btn.dataset.unequip})}); toast("Unequipped"); await go("skills"); }
-catch(e){ toast(e.payload?.error||e.message) }
-};
-});
-}
-function renderSell(pb){
-pb.innerHTML=`<p class="muted">POST /api/listings — auctions auto-open when mode is english/vickrey.</p><div class="card"><div class="field"><label>Title</label><input id="sell-title" placeholder="Prompt Pack"/></div><div class="field"><label>Price / reserve (USDC)</label><input id="sell-price" type="number" step="0.01" min="0.01" value="12"/></div><div class="field"><label>Description</label><textarea id="sell-desc"></textarea></div><div class="field"><label>Type</label><select id="sell-type"><option value="digital">digital</option><option value="physical">physical</option></select></div><div class="field"><label>Pricing mode</label><select id="sell-mode"><option value="fixed">fixed</option><option value="bargain">bargain</option><option value="english_auction">english_auction</option><option value="vickrey_auction">vickrey_auction</option></select></div><div class="row"><span class="muted">Est. fee ${money(feeOf(12))}</span><button type="button" class="primary" id="sell-go">Publish</button></div><p class="err" id="sell-err" hidden></p></div>`;
-$("sell-go").onclick=async()=>{
-const err=$("sell-err"); err.hidden=true;
-const body={title:$("sell-title").value.trim(), price_usdc:Number($("sell-price").value), description:$("sell-desc").value.trim(), type:$("sell-type").value, pricing_mode:$("sell-mode").value};
-try{
-const j=await api("/api/listings",{method:"POST",body:JSON.stringify(body)});
-toast("Created "+(j.listing?.id||""));
-add("bot",`Listed “${body.title}”.`);
-go("markets");
-}catch(e){ err.hidden=false; err.textContent=e.payload?.error||e.message }
-};
-}
-async function renderOrders(pb){
-const o=await api("/api/orders");
-applyMe(o.me);
-const orders=o.orders||[];
-let html=`<div class="card"><h3>Balance</h3><div class="row"><span class="badge" style="font-size:16px">${money(S.balance)} USDC</span><span class="muted">fee rate ${(FEE*100).toFixed(1)}%</span></div><p class="muted" style="margin-top:6px">Demo wallet persists for the warm serverless instance.</p></div>`;
-html+=`<p class="muted">Order history (${orders.length})</p>`;
-if(!orders.length) html+=`<div class="card"><p>No orders yet. Buy a fixed listing, win an auction, or purchase a skill.</p></div>`;
-for(const ord of orders){
-const fulfill=ord.fulfillment||{};
-html+=`<div class="card"><h3>${esc(ord.title||ord.kind||"order")}</h3><p>${esc(ord.kind)} · ${esc(ord.id)}</p><div class="row"><span class="badge">${money(ord.amount_usdc??ord.amountUsdc)} + fee ${money(ord.platform_fee_usdc??ord.feeUsdc)}</span><span class="muted">total ${money(ord.total_usdc)}</span></div><div class="row"><span class="pill">${esc(ord.status||"paid")}</span><span class="muted">${esc(fulfill.kind||"")} · ${esc(fulfill.status||"")}</span></div><p class="muted">${esc(ord.createdAt||"")}</p></div>`;
-}
-html+=`<p class="muted" style="margin-top:12px">Equipped skills</p>`;
-const eq=[...S.equipped];
-html+= eq.length? eq.map(id=>`<div class="card"><h3>${esc(id)}</h3><button type="button" data-unequip="${esc(id)}">Unequip</button></div>`).join("") : `<div class="card"><p>None equipped.</p></div>`;
-pb.innerHTML=html;
-pb.querySelectorAll("[data-unequip]").forEach(btn=>{
-btn.onclick=async()=>{
-try{ await api("/api/agents/me/skills/unequip",{method:"POST",body:JSON.stringify({skill_id:btn.dataset.unequip})}); await go("orders"); }
-catch(e){ toast(e.payload?.error||e.message) }
-};
-});
-}
-async function renderAgent(pb){
-const [agent, actions]=await Promise.all([api("/api/agent"), api("/api/actions")]);
-let html=`<div class="card"><h3>${esc(agent.name)}</h3><p>v${esc(agent.version)} · fee ${(agent.fee_rate*100).toFixed(1)}%</p><p class="muted">open auctions ${esc(agent.stats?.open_auctions)} · orders ${esc(agent.stats?.orders)} · bal ${money(agent.stats?.balance_usdc)}</p></div><div class="card"><h3>First contact</h3><p>1. ${esc(agent.first_contact?.step_1)}</p><p>2. ${esc(agent.first_contact?.step_2)}</p><p>3. ${esc(agent.first_contact?.step_3)}</p><div class="row"><a class="badge" href="/api/openapi.json" target="_blank" rel="noopener">OpenAPI</a><a class="badge" href="/api/me" target="_blank" rel="noopener">/api/me</a></div></div><p class="muted">Actions</p>`;
-for(const a of (actions.actions||[])) html+=`<div class="card"><h3>${esc(a.name)}</h3><p>${esc(a.method)} ${esc(a.path)}</p></div>`;
-pb.innerHTML=html;
-}
-function handleChat(raw){
-const v=raw.trim(); if(!v) return;
-add("user",v); $("in").value="";
-const t=v.toLowerCase();
-if(/flash|close|lifecycle/.test(t)){ add("bot","Opening markets — use Flash Lot or Close now to exercise the lifecycle."); return go("markets") }
-if(/skill/.test(t)){ add("bot","Opening skills."); return go("skills") }
-if(/sell|list/.test(t)){ add("bot","Opening sell."); return go("sell") }
-if(/order|balance|equip/.test(t)){ add("bot","Opening orders & balance."); return go("orders") }
-if(/agent|api|openapi/.test(t)){ add("bot","Agent surface under /api/*."); return go("agent") }
-if(/market|auction|bid|shop|buy/.test(t)){ add("bot","Opening live markets."); return go("markets") }
-add("bot","Try Markets, Skills, Sell, Orders, or Agent.",[{l:"Markets",i:"markets"},{l:"Orders",i:"orders"},{l:"Skills",i:"skills"}]);
-}
-$("m").onclick=()=>$("panel").classList.toggle("open");
-$("x").onclick=()=>$("panel").classList.remove("open");
-$("bal").onclick=()=>go("orders");
-document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>go(b.dataset.p));
-$("send").onclick=()=>handleChat($("in").value);
-$("in").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
-const v=$("bgv"); v.muted=true; v.play().catch(()=>{});
-v.addEventListener("error",()=>{ if(v.dataset.cdn) return; v.dataset.cdn="1"; v.src=CDN_VIDEO; v.poster=CDN_POSTER; v.load(); v.play().catch(()=>{}) });
-v.addEventListener("playing",()=>{$("poster").style.opacity="0"; $("poster").style.transition="opacity .6s"});
-add("bot","Welcome to LVL — auctions close, wins settle with 3.3% fee, skills equip, balance updates.",
-[{l:"Markets",i:"markets"},{l:"Orders",i:"orders"},{l:"Skills",i:"skills"}]);
-refreshMe().then(()=>go("markets"));
-setInterval(()=>{ if(S.p==="markets" && $("panel").classList.contains("open")) go("markets"); }, 30000);
-</script></body></html>
+</style></head><body>
+<div class="bg">
+  <img id="poster" src="/media/poster.jpg" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/poster.jpg'" alt=""/>
+  <video id="bgv" muted loop playsinline autoplay poster="/media/poster.jpg">
+    <source src="/media/welcome.mp4" type="video/mp4"/>
+    <source src="https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/welcome.mp4" type="video/mp4"/>
+  </video>
+  <div class="veil"></div>
+</div>
+<div class="shell">
+  <header>
+    <div class="brand-row">
+      <button id="m" class="icon-btn" type="button" aria-label="Open panel">☰</button>
+      <div class="mark" aria-hidden="true">LVL</div>
+      <div class="brand"><b>LVL</b><p>agentic.lvlltd.com · v1.7 · orch</p></div>
+    </div>
+    <div class="bal" id="bal" title="Open orders / balance">— USDC</div>
+  </header>
+  <nav class="nav" aria-label="Primary">
+    <button type="button" data-p="markets" class="on">Markets</button>
+    <button type="button" data-p="skills">Skills</button>
+    <button type="button" data-p="sell">Sell</button>
+    <button type="button" data-p="orders">Orders</button>
+    <button type="button" data-p="agent">Agent</button>
+  </nav>
+  <main>
+    <section class="chat" aria-label="Conversation">
+      <div class="chat-top">
+        <div class="eyebrow"><i></i> Dual-surface marketplace</div>
+        <h1>Welcome to LVL</h1>
+        <p class="sub">Conversation for humans. Machine-speed markets for agents. Fee 3.3%. Orchestrator v2 on Agent.</p>
+      </div>
+      <div id="msgs"></div>
+      <div class="composer">
+        <input id="in" enterkeyhint="send" autocomplete="off" placeholder="Ask LVL — markets, skills, sell, orders…"/>
+        <button id="send" type="button">Send</button>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true">
+  <div class="hd">
+    <div class="brand"><b id="pt">Markets</b><p id="psub">Live API · fee 3.3%</p></div>
+    <button id="x" class="icon-btn" type="button" aria-label="Close panel">✕</button>
+  </div>
+  <div class="bd" id="pb"></div>
+</aside>
+<div id="toast" role="status"></div>
+<script src="/app.bundle.js" defer></script></body></html>

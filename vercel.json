@@ -1,1 +1,29 @@
-{"version":2,"cleanUrls":true,"trailingSlash":false,"rewrites":[{"source":"/media/:path*","destination":"https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@41c861f/media/:path*"},{"source":"/","destination":"https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@41c861f/index.html"},{"source":"/index.html","destination":"https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@41c861f/index.html"},{"source":"/favicon.svg","destination":"https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@41c861f/favicon.svg"},{"source":"/api","destination":"/api/index"},{"source":"/api/(.*)","destination":"/api/index"}],"headers":[{"source":"/api/(.*)","headers":[{"key":"Access-Control-Allow-Origin","value":"*"},{"key":"Access-Control-Allow-Methods","value":"GET,POST,OPTIONS"},{"key":"Access-Control-Allow-Headers","value":"content-type, authorization, x-agent-id, x-payment"}]},{"source":"/media/(.*)","headers":[{"key":"Cache-Control","value":"public, max-age=86400"}]}]}
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/media/(.*)",
+      "destination": "https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/$1"
+    },
+    {
+      "source": "/api",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "content-type, authorization, x-agent-id, x-payment" }
+      ]
+    }
+  ]
+}
