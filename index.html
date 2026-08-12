@@ -264,4 +264,15 @@ pre.json{margin:8px 0 0;padding:10px;border-radius:12px;background:rgba(0,0,0,.4
   <div class="bd" id="pb"></div>
 </aside>
 <div id="toast" role="status"></div>
-<script src="/app.bundle.js" defer></script></body></html>
+<script>
+(function(){
+  var s=document.createElement('script');
+  s.src='/app.bundle.js';
+  s.onerror=function(){
+    var c=document.createElement('script');
+    c.src='https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@68b2e68b9bcbba40871d4f8bf3db5b3749ba8393/app.bundle.js';
+    document.body.appendChild(c);
+  };
+  document.body.appendChild(s);
+})();
+</script></body></html>
