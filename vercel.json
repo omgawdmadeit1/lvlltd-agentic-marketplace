@@ -4,6 +4,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/media/:path*",
+      "destination": "https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@main/media/:path*"
+    },
+    {
       "source": "/api",
       "destination": "/api/index"
     },
@@ -35,7 +39,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=86400"
         }
       ]
     }
