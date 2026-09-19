@@ -43,5 +43,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  process.stdout.write(`local storefront http://127.0.0.1:${PORT}  (Stripe TEST buy at /buy)\n`);
+  process.stdout.write(`local storefront http://127.0.0.1:${PORT}  (Stripe live buy at /buy)\n`);
 });

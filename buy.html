@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>LVL — Stripe TEST Buy</title>
+<title>LVL — Buy digital skill packs</title>
 <meta name="robots" content="noindex"/>
-<meta name="description" content="Stripe TEST Checkout for two digital skill packs. Not live revenue."/>
+<meta name="description" content="Stripe Checkout for two digital skill packs at $0.99."/>
 <link rel="icon" href="/favicon.svg"/>
 <style>
 :root{--bg:#07060c;--ink:#f6f3ff;--muted:#a9a0c4;--line:rgba(255,255,255,.12);--cyan:#38bdf8;--warn:#fbbf24;--ok:#86efac;--err:#fca5a5;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:var(--bg);color:var(--ink);font-family:var(--font);padding:24px}
 a{color:#c4b5fd}h1{margin:0 0 8px;font-size:1.5rem}.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.banner{border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.12);color:var(--warn);border-radius:14px;padding:10px 12px;font-size:12px;font-family:var(--mono);margin:16px 0}
+.banner{border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.12);color:var(--cyan);border-radius:14px;padding:10px 12px;font-size:12px;font-family:var(--mono);margin:16px 0}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));max-width:820px}
 .card{border:1px solid var(--line);border-radius:16px;padding:16px;background:rgba(255,255,255,.03)}
 .card h2{margin:0 0 6px;font-size:16px}button{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#f0abfc,#a78bfa 55%,#38bdf8);color:#120b1f;min-height:42px}
@@ -22,21 +22,21 @@ button:disabled{opacity:.45;cursor:not-allowed}.badge{font-family:var(--mono);fo
 <body>
 <p class="muted"><a href="/">← agentic.lvlltd.com</a></p>
 <h1>Buy digital skill packs</h1>
-<p class="muted">Stripe TEST Checkout only. $0.99 is a test amount. livemode false. Do not treat completions as live revenue.</p>
-<div class="banner">TEST MODE · mode=test · livemode=false · rail=a2a-marketplace · trigger=skillforge-agentic-buy</div>
+<p class="muted">Stripe Checkout · $0.99. A created session is not a paid charge and is not reported revenue.</p>
+<div class="banner">mode=live · rail=a2a-marketplace · trigger=skillforge-agentic-buy</div>
 <p id="sf-status" class="sf-status" hidden></p>
 <div class="grid">
   <article class="card">
     <h2>x402 Merchant OS</h2>
     <p class="muted">Digital skill pack: operating playbook for an x402 catalog, proof, and dispute flow.</p>
-    <p class="badge">$0.99 TEST · lvl-x402-merchant-os</p>
-    <p style="margin-top:12px"><button type="button" data-sf-buy="lvl-x402-merchant-os">Buy $0.99 (TEST)</button></p>
+    <p class="badge">$0.99 · lvl-x402-merchant-os</p>
+    <p style="margin-top:12px"><button type="button" data-sf-buy="lvl-x402-merchant-os">Buy $0.99</button></p>
   </article>
   <article class="card">
     <h2>Cold-Start Catalog Bootstrapper</h2>
     <p class="muted">Digital skill pack: catalog bootstrap playbook for a new marketplace storefront.</p>
-    <p class="badge">$0.99 TEST · lvl-cold-start-catalog-bootstrapper</p>
-    <p style="margin-top:12px"><button type="button" data-sf-buy="lvl-cold-start-catalog-bootstrapper">Buy $0.99 (TEST)</button></p>
+    <p class="badge">$0.99 · lvl-cold-start-catalog-bootstrapper</p>
+    <p style="margin-top:12px"><button type="button" data-sf-buy="lvl-cold-start-catalog-bootstrapper">Buy $0.99</button></p>
   </article>
 </div>
 <p class="muted" style="margin-top:18px">API: GET /api/checkout · POST /api/checkout { a2a_listing_id }. Demo USDC wallet buys on Markets/Skills are unchanged and are not Stripe.</p>

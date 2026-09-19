@@ -3,10 +3,10 @@
 const {
   listingById,
   listingByPriceId,
-  isUnprovenLivePriceId,
+  isRetiredTestPriceId,
   checkoutMetadata,
   publicCatalog,
-  resolveTestSecretKey,
+  resolveLiveSecretKey,
   stripeRequest,
 } = require("../lib/stripe-test-catalog");
 
@@ -54,27 +54,31 @@ function publicOrigin(req) {
   return `${proto}://${host}`;
 }
 
+function fail(extra) {
+  return { ok: false, mode: "live", livemode: true, ...extra };
+}
+
 function resolveListing(input) {
   const listingId = String(input.a2a_listing_id || input.listing_id || input.skill || "").trim();
   const priceId = String(input.price_id || "").trim();
-  if (priceId && isUnprovenLivePriceId(priceId)) {
+  if (priceId && isRetiredTestPriceId(priceId)) {
     return {
-      error: "live_price_id_rejected",
-      message: "Unproven LIVE price_ids are blocked. TEST catalog only.",
+      error: "test_price_id_rejected",
+      message: "Retired TEST price_ids are blocked. LIVE catalog only.",
     };
   }
   if (listingId) {
     const listing = listingById(listingId);
     if (!listing) {
       return {
-        error: "listing_not_in_test_catalog",
-        message: "Unknown a2a_listing_id. TEST catalog is two digital SKUs only.",
+        error: "listing_not_in_live_catalog",
+        message: "Unknown a2a_listing_id. LIVE catalog is two digital SKUs only.",
       };
     }
     if (priceId && priceId !== listing.price_id) {
       return {
         error: "price_id_mismatch",
-        message: "price_id does not match the allowlisted TEST price for this listing.",
+        message: "price_id does not match the allowlisted LIVE price for this listing.",
       };
     }
     return { listing };
@@ -83,8 +87,8 @@ function resolveListing(input) {
     const listing = listingByPriceId(priceId);
     if (!listing) {
       return {
-        error: "price_id_not_in_test_catalog",
-        message: "price_id is not one of the proven TEST ids.",
+        error: "price_id_not_in_live_catalog",
+        message: "price_id is not one of the LIVE ids.",
       };
     }
     return { listing };
@@ -98,17 +102,18 @@ function resolveListing(input) {
 function publicSession(session, listing) {
   return {
     ok: true,
-    mode: "test",
-    livemode: false,
-    honesty: "Stripe TEST session. Not live revenue.",
+    mode: "live",
+    livemode: true,
+    honesty:
+      "Stripe Checkout session created. This is not a revenue claim until Stripe reports a paid live charge.",
     listing: listing
       ? {
           a2a_listing_id: listing.a2a_listing_id,
           name: listing.name,
           price_id: listing.price_id,
-          amount_label: "$0.99 TEST",
-          mode: "test",
-          livemode: false,
+          amount_label: "$0.99",
+          mode: "live",
+          livemode: true,
         }
       : null,
     checkout: {
@@ -118,17 +123,17 @@ function publicSession(session, listing) {
       payment_status: session.payment_status || null,
       amount_total: session.amount_total || null,
       currency: session.currency || null,
-      livemode: false,
-      mode: "test",
-      metadata: session.metadata || checkoutMetadata(listing),
+      livemode: true,
+      mode: "live",
+      metadata: session.metadata || (listing ? checkoutMetadata(listing) : null),
     },
   };
 }
 
 async function createCheckoutSession(req, listing) {
-  const secret = resolveTestSecretKey(process.env);
+  const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
-    return { status: 503, body: { ok: false, mode: "test", livemode: false, ...secret } };
+    return { status: 503, body: fail(secret) };
   }
   const origin = publicOrigin(req);
   const metadata = checkoutMetadata(listing);
@@ -149,43 +154,34 @@ async function createCheckoutSession(req, listing) {
   if (!response.ok || !json || !json.id) {
     return {
       status: response.status >= 400 ? response.status : 502,
-      body: {
-        ok: false,
-        mode: "test",
-        livemode: false,
+      body: fail({
         error: "stripe_checkout_failed",
-        message: "Stripe TEST Checkout session was not created. Check the TEST key and price_id.",
+        message: "Stripe Checkout session was not created. Check the LIVE key and price_id.",
         stripe_type: json && json.error && json.error.type ? json.error.type : null,
         stripe_code: json && json.error && json.error.code ? json.error.code : null,
-      },
+      }),
     };
   }
-  if (json.livemode === true) {
+  if (json.livemode !== true) {
     return {
       status: 409,
-      body: {
-        ok: false,
-        mode: "test",
-        livemode: false,
-        error: "livemode_session_rejected",
-        message: "Stripe returned a live session. TEST mode only — session not forwarded.",
-      },
+      body: fail({
+        error: "test_session_rejected",
+        message: "Stripe returned a test session. LIVE mode only — session not forwarded.",
+      }),
     };
   }
   return { status: 200, body: publicSession(json, listing) };
 }
 
 async function retrieveCheckoutSession(sessionId) {
-  const secret = resolveTestSecretKey(process.env);
+  const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
-    return { status: 503, body: { ok: false, mode: "test", livemode: false, ...secret } };
+    return { status: 503, body: fail(secret) };
   }
   const id = String(sessionId || "").trim();
-  if (!/^cs_(test_)?[A-Za-z0-9]+$/.test(id)) {
-    return {
-      status: 400,
-      body: { ok: false, mode: "test", livemode: false, error: "invalid_session_id" },
-    };
+  if (!/^cs_(test_|live_)?[A-Za-z0-9]+$/.test(id)) {
+    return { status: 400, body: fail({ error: "invalid_session_id" }) };
   }
   const { response, json } = await stripeRequest({
     key: secret.key,
@@ -195,25 +191,19 @@ async function retrieveCheckoutSession(sessionId) {
   if (!response.ok) {
     return {
       status: response.status >= 400 ? response.status : 502,
-      body: {
-        ok: false,
-        mode: "test",
-        livemode: false,
+      body: fail({
         error: "stripe_session_lookup_failed",
-        message: "Could not load this Stripe TEST session.",
-      },
+        message: "Could not load this Stripe Checkout session.",
+      }),
     };
   }
-  if (json.livemode === true) {
+  if (json.livemode !== true) {
     return {
       status: 409,
-      body: {
-        ok: false,
-        mode: "test",
-        livemode: false,
-        error: "livemode_session_rejected",
-        message: "Live sessions are not shown here.",
-      },
+      body: fail({
+        error: "test_session_rejected",
+        message: "Test sessions are not shown on this LIVE storefront.",
+      }),
     };
   }
   const listing =
@@ -222,7 +212,7 @@ async function retrieveCheckoutSession(sessionId) {
   return { status: 200, body: publicSession(json, listing) };
 }
 
-module.exports = async function handleStripeTestCheckout(req, res) {
+module.exports = async function handleStripeLiveCheckout(req, res) {
   try {
     if ((req.method || "GET").toUpperCase() === "OPTIONS") {
       res.statusCode = 204;
@@ -254,7 +244,7 @@ module.exports = async function handleStripeTestCheckout(req, res) {
       const body = await readBody(req);
       const resolved = resolveListing(body);
       if (resolved.error) {
-        send(res, 400, { ok: false, mode: "test", livemode: false, ...resolved });
+        send(res, 400, fail(resolved));
         return;
       }
       const result = await createCheckoutSession(req, resolved.listing);
@@ -262,21 +252,15 @@ module.exports = async function handleStripeTestCheckout(req, res) {
       return;
     }
 
-    send(res, 404, {
-      ok: false,
-      mode: "test",
-      livemode: false,
+    send(res, 404, fail({
       error: "not_found",
       hint: "GET /api/checkout or POST /api/checkout { a2a_listing_id }",
-    });
+    }));
   } catch (error) {
-    send(res, 500, {
-      ok: false,
-      mode: "test",
-      livemode: false,
+    send(res, 500, fail({
       error: "internal",
       message: String(error && error.message ? error.message : error),
-    });
+    }));
   }
 };
 

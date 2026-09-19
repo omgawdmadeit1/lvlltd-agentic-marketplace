@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var MODE_LABEL = "TEST MODE · livemode false · not live revenue";
+  var MODE_LABEL = "Stripe Checkout · $0.99 · mode=live";
 
   function $(id) {
     return document.getElementById(id);
@@ -32,7 +32,7 @@
       panel.classList.remove("open");
       panel.setAttribute("aria-hidden", "true");
     }
-    setStatus("Opening Stripe TEST Checkout…", "warn");
+    setStatus("Opening Stripe Checkout…", "warn");
     try {
       var response = await fetch("/api/checkout", {
         method: "POST",
@@ -42,16 +42,12 @@
       var payload = await response.json().catch(function () {
         return {};
       });
-      if (payload.livemode === true) {
-        setStatus("Refusing live Stripe session. TEST mode only.", "err");
+      if (payload.livemode === false || (payload.checkout && payload.checkout.livemode === false)) {
+        setStatus("Refusing test Stripe session. This storefront is LIVE.", "err");
         return;
       }
       if (!response.ok || !payload.ok || !payload.checkout || !payload.checkout.url) {
-        setStatus(payload.message || payload.error || "TEST Checkout is not ready.", "err");
-        return;
-      }
-      if (payload.checkout.livemode === true) {
-        setStatus("Refusing live Stripe session. TEST mode only.", "err");
+        setStatus(payload.message || payload.error || "Checkout is not ready.", "err");
         return;
       }
       window.location.href = payload.checkout.url;
@@ -67,12 +63,12 @@
     var state = params.get("checkout");
     var sessionId = params.get("session_id");
     if (state === "cancel") {
-      setStatus("TEST Checkout canceled. No charge. Still mode=test.", "warn");
+      setStatus("Checkout canceled. No charge recorded here.", "warn");
       return;
     }
     if (state !== "success") return;
     if (!sessionId) {
-      setStatus("Returned from Stripe TEST Checkout. Confirm in the Stripe TEST dashboard — not live revenue.", "ok");
+      setStatus("Returned from Stripe Checkout. Confirm payment_status in the Stripe Dashboard — this page does not invent revenue.", "ok");
       return;
     }
     try {
@@ -80,23 +76,23 @@
       var payload = await response.json().catch(function () {
         return {};
       });
-      if (payload.livemode === true || (payload.checkout && payload.checkout.livemode === true)) {
-        setStatus("Live session hidden. This storefront only reports TEST.", "err");
+      if (payload.livemode === false || (payload.checkout && payload.checkout.livemode === false)) {
+        setStatus("Test session hidden. This storefront only reports LIVE Checkout.", "err");
         return;
       }
       if (!response.ok || !payload.ok) {
-        setStatus(payload.message || "Returned from TEST Checkout. Session lookup unavailable.", "warn");
+        setStatus(payload.message || "Returned from Checkout. Session lookup unavailable.", "warn");
         return;
       }
       var payment = payload.checkout && payload.checkout.payment_status ? payload.checkout.payment_status : "unknown";
       setStatus(
-        "Stripe TEST session " +
+        "Stripe session payment_status=" +
           payment +
-          " · $0.99 TEST · livemode false. Do not count as live revenue.",
+          " · $0.99 · mode=live. Not a revenue claim from this page.",
         "ok"
       );
     } catch (error) {
-      setStatus("Returned from Stripe TEST Checkout. Session lookup failed.", "warn");
+      setStatus("Returned from Stripe Checkout. Session lookup failed.", "warn");
     }
   }
 
@@ -115,5 +111,5 @@
     bind();
   }
 
-  window.LVLStripeTestBuy = { startCheckout: startCheckout, MODE_LABEL: MODE_LABEL };
+  window.LVLStripeLiveBuy = { startCheckout: startCheckout, MODE_LABEL: MODE_LABEL };
 })();
