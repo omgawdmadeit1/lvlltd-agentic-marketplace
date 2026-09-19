@@ -3,3 +3,6 @@
 .env.*.local
 node_modules/
 .vercel
+.playwright-mcp/
+buy-page-snapshot.yml
+*.png
