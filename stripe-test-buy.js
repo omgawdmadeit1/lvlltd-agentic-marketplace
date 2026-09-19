@@ -25,6 +25,13 @@
       return;
     }
     if (button) button.disabled = true;
+    var scrim = $("scrim");
+    if (scrim) scrim.classList.remove("on");
+    var panel = $("panel");
+    if (panel) {
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden", "true");
+    }
     setStatus("Opening Stripe TEST Checkout…", "warn");
     try {
       var response = await fetch("/api/checkout", {
