@@ -1,1 +1,9 @@
-{"name":"lvlltd-agentic-marketplace","private":true,"version":"1.7.1"}
+{
+  "name": "lvlltd-agentic-marketplace",
+  "private": true,
+  "version": "1.7.2",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "local": "node scripts/local-storefront.js"
+  }
+}
