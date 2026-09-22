@@ -5,5 +5,8 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "local": "node scripts/local-storefront.js"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   }
 }
