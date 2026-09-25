@@ -54,6 +54,7 @@ test("checkout metadata is the required LIVE rail payload", () => {
   assert.deepEqual(checkoutMetadata(listing), {
     rail: "a2a-marketplace",
     a2a_listing_id: "lvl-x402-merchant-os",
+    sku: "lvl-x402-merchant-os",
     price_id: "price_1UFmzKE9E4WCqx1QjoXF3BMO",
     mode: "live",
     trigger: "skillforge-agentic-buy",
@@ -210,11 +211,16 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   const form = captured.init.body;
   assert.match(form, /metadata%5Brail%5D=a2a-marketplace/);
   assert.match(form, /metadata%5Ba2a_listing_id%5D=lvl-cold-start-catalog-bootstrapper/);
+  assert.match(form, /metadata%5Bsku%5D=lvl-cold-start-catalog-bootstrapper/);
   assert.match(form, /metadata%5Bprice_id%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
   assert.match(form, /metadata%5Bmode%5D=live/);
   assert.match(form, /metadata%5Btrigger%5D=skillforge-agentic-buy/);
   assert.match(form, /payment_intent_data%5Bmetadata%5D%5Brail%5D=a2a-marketplace/);
   assert.match(form, /line_items%5B0%5D%5Bprice%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
+  assert.match(
+    form,
+    /success_url=https%3A%2F%2Fagentic\.lvlltd\.com%2Fbuy%2Fsuccess%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
+  );
   assert.doesNotMatch(form, /payment_method_types/);
 });
 
