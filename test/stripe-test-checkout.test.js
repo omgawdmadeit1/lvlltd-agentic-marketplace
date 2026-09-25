@@ -69,8 +69,9 @@ test("retired TEST price_ids are rejected", () => {
 });
 
 test("unknown listing ids are rejected", () => {
-  const resolved = resolveListing({ a2a_listing_id: "skill_sniper" });
-  assert.equal(resolved.error, "listing_not_in_live_catalog");
+  assert.equal(resolveListing({ a2a_listing_id: "lvl-unknown-pack" }).error, "listing_not_in_live_catalog");
+  // Underscore is outside the strict /^[a-z0-9-]{3,64}$/ pattern.
+  assert.equal(resolveListing({ a2a_listing_id: "skill_sniper" }).error, "invalid_listing_id");
 });
 
 test("price mismatch against allowlist is rejected", () => {
@@ -133,7 +134,7 @@ test("POST /api/checkout without a LIVE key stays 503 and leaks no secrets", asy
   const req = {
     method: "POST",
     url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com" },
+    headers: { host: "agentic.lvlltd.com", origin: "https://agentic.lvlltd.com" },
     on(event, cb) {
       if (event === "data") cb(Buffer.from('{"a2a_listing_id":"lvl-x402-merchant-os"}'));
       if (event === "end") cb();
@@ -185,7 +186,11 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   const req = {
     method: "POST",
     url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com", "x-forwarded-proto": "https" },
+    headers: {
+      host: "agentic.lvlltd.com",
+      "x-forwarded-proto": "https",
+      origin: "https://agentic.lvlltd.com",
+    },
     on(event, cb) {
       if (event === "data") {
         cb(Buffer.from('{"a2a_listing_id":"lvl-cold-start-catalog-bootstrapper"}'));
@@ -241,7 +246,7 @@ test("test Stripe sessions are not forwarded", async () => {
   const req = {
     method: "POST",
     url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com" },
+    headers: { host: "agentic.lvlltd.com", origin: "https://agentic.lvlltd.com" },
     on(event, cb) {
       if (event === "data") cb(Buffer.from('{"a2a_listing_id":"lvl-x402-merchant-os"}'));
       if (event === "end") cb();
