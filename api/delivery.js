@@ -22,6 +22,7 @@ const {
   deliveryOrigin,
   successPageUrl,
 } = require("../lib/delivery");
+const { attributionFromSession } = require("../lib/attribution");
 const { packForSku, loadVerifiedPack } = require("../lib/delivery-packs");
 const { sendDeliveryEmail, escapeHtml } = require("../lib/delivery-email");
 
@@ -122,6 +123,13 @@ async function deliverSession(sessionId, env) {
   if (!loaded.ok) {
     return { deliverable: false, reason: loaded.error, retry: loaded.status >= 500 };
   }
+  const result = await deliverLoadedSession(loaded, env);
+  // Display-only ?ref= / utm_* for the log line and fulfillment record. Computed after the
+  // delivery decision and never passed into it, so attribution can't affect delivery.
+  return { ...result, attribution: attributionFromSession(loaded.session) };
+}
+
+async function deliverLoadedSession(loaded, env) {
   const decision = assessDeliverability(loaded.session);
   if (!decision.ok) return { deliverable: false, reason: decision.reason };
   const origin = deliveryOrigin(env);

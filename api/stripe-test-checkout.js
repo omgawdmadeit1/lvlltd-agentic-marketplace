@@ -10,6 +10,7 @@ const {
   stripeRequest,
 } = require("../lib/stripe-test-catalog");
 const { deliveryOrigin, checkoutSuccessUrl, successPageUrl } = require("../lib/delivery");
+const { attributionFromInput, attributionMetadata } = require("../lib/attribution");
 
 function send(res, status, body) {
   const payload = JSON.stringify(body, null, 2);
@@ -212,21 +213,23 @@ function publicSession(session, listing) {
   };
 }
 
-async function createCheckoutSession(listing) {
+async function createCheckoutSession(listing, attribution) {
   const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
     return { status: 503, body: fail(secret) };
   }
   // Fixed public origin (DELIVERY_PUBLIC_ORIGIN, default https://agentic.lvlltd.com), never the Host header.
   const origin = deliveryOrigin(process.env);
-  const metadata = checkoutMetadata(listing);
+  // Optional ?ref= / utm_* attribution: informational only, merged after the catalog keys.
+  const extra = attributionMetadata(attribution);
+  const metadata = { ...checkoutMetadata(listing), ...extra };
   const { response, json } = await stripeRequest({
     key: secret.key,
     method: "POST",
     path: "/checkout/sessions",
     body: {
       mode: "payment",
-      client_reference_id: listing.a2a_listing_id,
+      client_reference_id: extra.ref || listing.a2a_listing_id,
       // Server-verified order page: shows the signed download link only once Stripe reports paid.
       success_url: checkoutSuccessUrl(process.env),
       cancel_url: `${origin}/buy?checkout=cancel&listing=${encodeURIComponent(listing.a2a_listing_id)}`,
@@ -345,7 +348,7 @@ module.exports = async function handleStripeLiveCheckout(req, res) {
         send(res, 400, fail(resolved));
         return;
       }
-      const result = await createCheckoutSession(resolved.listing);
+      const result = await createCheckoutSession(resolved.listing, attributionFromInput(body.value));
       send(res, result.status, result.body);
       return;
     }

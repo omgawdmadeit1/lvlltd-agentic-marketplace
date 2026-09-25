@@ -20,6 +20,29 @@
     return button.getAttribute("data-sf-buy") || button.getAttribute("data-listing") || "";
   }
 
+  var REF_PATTERN = /^[a-z0-9_-]{1,32}$/;
+  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
+
+  // Optional attribution from the /buy URL: ?ref=<code>&utm_*=... Invalid values are dropped;
+  // the server re-validates. Never blocks checkout.
+  function checkoutBody(listingId) {
+    var body = { a2a_listing_id: listingId };
+    var params;
+    try {
+      params = new URLSearchParams(window.location.search);
+    } catch (error) {
+      return body;
+    }
+    var ref = params.get("ref");
+    if (ref && REF_PATTERN.test(ref)) body.ref = ref;
+    UTM_KEYS.forEach(function (key) {
+      var value = params.get(key);
+      var cleaned = value ? value.trim().toLowerCase() : "";
+      if (REF_PATTERN.test(cleaned)) body[key] = cleaned;
+    });
+    return body;
+  }
+
   async function startCheckout(listingId, button) {
     if (!listingId) {
       setStatus("Missing listing id.", "err");
@@ -38,7 +61,7 @@
       var response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ a2a_listing_id: listingId }),
+        body: JSON.stringify(checkoutBody(listingId)),
       });
       var payload = await response.json().catch(function () {
         return {};
