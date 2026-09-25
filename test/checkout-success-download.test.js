@@ -166,7 +166,8 @@ async function runBuyPage(search, sessionPayload) {
     URLSearchParams,
     fetch: async (url) => {
       fetches.push(String(url));
-      return { ok: true, json: async () => sessionPayload || {} };
+      const payload = sessionPayload || {};
+      return { ok: payload.ok !== false, json: async () => payload };
     },
   };
   vm.createContext(context);
@@ -195,6 +196,17 @@ test("buy page: /buy?checkout=success links to the storefront download page", as
 
   page = await runBuyPage("?checkout=success&session_id=cs_test_x", { livemode: false });
   assert.equal(page.elements["sf-download"].hidden, true);
+
+  // GET /api/checkout/session rejects test sessions with livemode: true.
+  page = await runBuyPage("?checkout=success&session_id=cs_test_x", {
+    ok: false,
+    mode: "live",
+    livemode: true,
+    error: "test_session_rejected",
+    message: "Test sessions are not shown on this LIVE storefront.",
+  });
+  assert.equal(page.elements["sf-download"].hidden, true);
+  assert.equal(page.elements["sf-status"].textContent, "Test session hidden. This storefront only reports LIVE Checkout.");
 
   // A non-https pack_download_url is ignored; the same-origin fallback link stays.
   page = await runBuyPage("?checkout=success&session_id=cs_live_old", {

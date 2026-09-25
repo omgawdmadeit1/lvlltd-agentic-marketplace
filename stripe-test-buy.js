@@ -105,7 +105,11 @@
       var payload = await response.json().catch(function () {
         return {};
       });
-      if (payload.livemode === false || (payload.checkout && payload.checkout.livemode === false)) {
+      if (
+        payload.error === "test_session_rejected" ||
+        payload.livemode === false ||
+        (payload.checkout && payload.checkout.livemode === false)
+      ) {
         hidePackDownload();
         setStatus("Test session hidden. This storefront only reports LIVE Checkout.", "err");
         return;
