@@ -144,11 +144,17 @@ async function createCheckoutSession(req, listing) {
     body: {
       mode: "payment",
       client_reference_id: listing.a2a_listing_id,
-      success_url: `${origin}/buy?checkout=success&listing=${encodeURIComponent(listing.a2a_listing_id)}&session_id={CHECKOUT_SESSION_ID}`,
+      // Server-verified order page: shows the signed download link only once Stripe reports paid.
+      success_url: `${origin}/buy/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/buy?checkout=cancel&listing=${encodeURIComponent(listing.a2a_listing_id)}`,
       line_items: [{ price: listing.price_id, quantity: 1 }],
       metadata,
       payment_intent_data: { metadata },
+      custom_text: {
+        submit: {
+          message: "After payment you get an instant download link on the next page and by email.",
+        },
+      },
     },
   });
   if (!response.ok || !json || !json.id) {
