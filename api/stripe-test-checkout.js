@@ -12,6 +12,7 @@ const {
   resolveLiveSecretKey,
   stripeRequest,
 } = require("../lib/stripe-test-catalog");
+const { attributionFromInput, attributionMetadata } = require("../lib/attribution");
 
 function send(res, status, body) {
   const payload = JSON.stringify(body, null, 2);
@@ -124,7 +125,7 @@ function publicSession(session, listing) {
   };
 }
 
-async function createCheckoutSession(listing) {
+async function createCheckoutSession(listing, attribution) {
   const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
     return { status: 503, body: fail(secret) };
@@ -133,14 +134,16 @@ async function createCheckoutSession(listing) {
   if (!success.ok) {
     return { status: 503, body: fail(success) };
   }
-  const metadata = checkoutMetadata(listing);
+  // Optional ?ref= / utm_* attribution: informational only, merged after the catalog keys.
+  const extra = attributionMetadata(attribution);
+  const metadata = { ...checkoutMetadata(listing), ...extra };
   const { response, json } = await stripeRequest({
     key: secret.key,
     method: "POST",
     path: "/checkout/sessions",
     body: {
       mode: "payment",
-      client_reference_id: listing.a2a_listing_id,
+      client_reference_id: extra.ref || listing.a2a_listing_id,
       success_url: success.url,
       cancel_url: CHECKOUT_CANCEL_URL,
       line_items: [{ price: listing.price_id, quantity: 1 }],
@@ -244,7 +247,7 @@ module.exports = async function handleStripeLiveCheckout(req, res) {
         send(res, 400, fail(resolved));
         return;
       }
-      const result = await createCheckoutSession(resolved.listing);
+      const result = await createCheckoutSession(resolved.listing, attributionFromInput(body));
       send(res, result.status, result.body);
       return;
     }
