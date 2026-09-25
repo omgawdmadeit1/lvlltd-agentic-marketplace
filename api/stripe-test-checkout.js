@@ -5,6 +5,9 @@ const {
   listingByPriceId,
   isRetiredTestPriceId,
   checkoutMetadata,
+  checkoutSuccessUrl,
+  packDownloadUrl,
+  CHECKOUT_CANCEL_URL,
   publicCatalog,
   resolveLiveSecretKey,
   stripeRequest,
@@ -42,16 +45,6 @@ function readBody(req) {
 function requestUrl(req) {
   const host = String(req.headers.host || "agentic.lvlltd.com").split(",")[0].trim();
   return new URL(req.url || "/", `https://${host}`);
-}
-
-function publicOrigin(req) {
-  const proto = String(req.headers["x-forwarded-proto"] || "https")
-    .split(",")[0]
-    .trim();
-  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "agentic.lvlltd.com")
-    .split(",")[0]
-    .trim();
-  return `${proto}://${host}`;
 }
 
 function fail(extra) {
@@ -127,15 +120,19 @@ function publicSession(session, listing) {
       mode: "live",
       metadata: session.metadata || (listing ? checkoutMetadata(listing) : null),
     },
+    pack_download_url: packDownloadUrl(session.id),
   };
 }
 
-async function createCheckoutSession(req, listing) {
+async function createCheckoutSession(listing) {
   const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
     return { status: 503, body: fail(secret) };
   }
-  const origin = publicOrigin(req);
+  const success = checkoutSuccessUrl(process.env);
+  if (!success.ok) {
+    return { status: 503, body: fail(success) };
+  }
   const metadata = checkoutMetadata(listing);
   const { response, json } = await stripeRequest({
     key: secret.key,
@@ -144,8 +141,8 @@ async function createCheckoutSession(req, listing) {
     body: {
       mode: "payment",
       client_reference_id: listing.a2a_listing_id,
-      success_url: `${origin}/buy?checkout=success&listing=${encodeURIComponent(listing.a2a_listing_id)}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/buy?checkout=cancel&listing=${encodeURIComponent(listing.a2a_listing_id)}`,
+      success_url: success.url,
+      cancel_url: CHECKOUT_CANCEL_URL,
       line_items: [{ price: listing.price_id, quantity: 1 }],
       metadata,
       payment_intent_data: { metadata },
@@ -247,7 +244,7 @@ module.exports = async function handleStripeLiveCheckout(req, res) {
         send(res, 400, fail(resolved));
         return;
       }
-      const result = await createCheckoutSession(req, resolved.listing);
+      const result = await createCheckoutSession(resolved.listing);
       send(res, result.status, result.body);
       return;
     }
