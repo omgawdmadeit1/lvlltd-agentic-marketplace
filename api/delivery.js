@@ -105,7 +105,7 @@ function readRawBody(req) {
 }
 
 async function findSessionIdForPaymentIntent(paymentIntentId, env) {
-  if (!/^pi_[A-Za-z0-9]+$/.test(String(paymentIntentId || ""))) return { ok: true, sessionId: null };
+  if (!/^pi_[A-Za-z0-9_]+$/.test(String(paymentIntentId || ""))) return { ok: true, sessionId: null };
   const secret = resolveLiveSecretKey(env);
   if (!secret.ok) return { ok: false, error: secret.error };
   const { response, json } = await stripeRequest({
