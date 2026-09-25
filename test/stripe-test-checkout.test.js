@@ -10,6 +10,10 @@ const {
   resolveLiveSecretKey,
   encodeStripeForm,
   checkoutMetadata,
+  checkoutSuccessUrl,
+  packDownloadUrl,
+  DEFAULT_CHECKOUT_SUCCESS_URL,
+  CHECKOUT_CANCEL_URL,
 } = require("../lib/stripe-test-catalog");
 const { resolveListing } = require("../api/stripe-test-checkout");
 
@@ -152,9 +156,27 @@ test("POST /api/checkout without a LIVE key stays 503 and leaks no secrets", asy
   else delete process.env.STRIPE_MODE;
 });
 
+test("checkout success URL defaults to the lvlltd pack page and stays overridable", () => {
+  assert.equal(
+    DEFAULT_CHECKOUT_SUCCESS_URL,
+    "https://lvlltd.com/buy/success?session_id={CHECKOUT_SESSION_ID}"
+  );
+  assert.equal(CHECKOUT_CANCEL_URL, "https://agentic.lvlltd.com/buy?checkout=cancel");
+  assert.equal(checkoutSuccessUrl({}).url, DEFAULT_CHECKOUT_SUCCESS_URL);
+  const custom = "https://packs.example/buy/success?session_id={CHECKOUT_SESSION_ID}";
+  assert.equal(checkoutSuccessUrl({ CHECKOUT_SUCCESS_URL: custom }).url, custom);
+  assert.equal(checkoutSuccessUrl({ CHECKOUT_SUCCESS_URL: "http://lvlltd.com/buy/success?session_id={CHECKOUT_SESSION_ID}" }).ok, false);
+  assert.equal(checkoutSuccessUrl({ CHECKOUT_SUCCESS_URL: "https://lvlltd.com/buy/success" }).ok, false);
+  assert.equal(
+    packDownloadUrl("cs_live_123", {}),
+    "https://lvlltd.com/buy/success?session_id=cs_live_123"
+  );
+});
+
 test("POST /api/checkout creates a LIVE session with required metadata", async () => {
   process.env.STRIPE_SECRET_KEY = "sk_live_dummy";
   process.env.STRIPE_MODE = "live";
+  delete process.env.CHECKOUT_SUCCESS_URL;
   const originalFetch = global.fetch;
   let captured;
   global.fetch = async (url, init) => {
@@ -206,6 +228,7 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   assert.equal(body.checkout.metadata.trigger, "skillforge-agentic-buy");
   assert.equal(body.checkout.metadata.mode, "live");
   assert.equal(body.listing.amount_label, "$0.99");
+  assert.equal(body.pack_download_url, "https://lvlltd.com/buy/success?session_id=cs_live_123");
   assert.equal(captured.url, "https://api.stripe.com/v1/checkout/sessions");
   const form = captured.init.body;
   assert.match(form, /metadata%5Brail%5D=a2a-marketplace/);
@@ -215,7 +238,81 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   assert.match(form, /metadata%5Btrigger%5D=skillforge-agentic-buy/);
   assert.match(form, /payment_intent_data%5Bmetadata%5D%5Brail%5D=a2a-marketplace/);
   assert.match(form, /line_items%5B0%5D%5Bprice%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
+  assert.match(
+    form,
+    /success_url=https%3A%2F%2Flvlltd.com%2Fbuy%2Fsuccess%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
+  );
+  assert.match(
+    form,
+    /cancel_url=https%3A%2F%2Fagentic.lvlltd.com%2Fbuy%3Fcheckout%3Dcancel/
+  );
+  assert.doesNotMatch(form, /checkout%3Dsuccess/);
   assert.doesNotMatch(form, /payment_method_types/);
+});
+
+test("POST /api/checkout honors CHECKOUT_SUCCESS_URL and refuses a bad one", async () => {
+  process.env.STRIPE_SECRET_KEY = "sk_live_dummy";
+  process.env.STRIPE_MODE = "live";
+  process.env.CHECKOUT_SUCCESS_URL = "https://packs.example/paid?session_id={CHECKOUT_SESSION_ID}";
+  const originalFetch = global.fetch;
+  let calls = 0;
+  let capturedBody = "";
+  global.fetch = async (_url, init) => {
+    calls += 1;
+    capturedBody = init && init.body ? init.body : "";
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "cs_live_456",
+        url: "https://checkout.stripe.com/c/pay/cs_live_456",
+        livemode: true,
+        status: "open",
+        payment_status: "unpaid",
+        amount_total: 99,
+        currency: "usd",
+      }),
+    };
+  };
+  const handler = require("../api/index");
+  const req = {
+    method: "POST",
+    url: "/api/checkout",
+    headers: { host: "agentic.lvlltd.com", "x-forwarded-proto": "https" },
+    on(event, cb) {
+      if (event === "data") cb(Buffer.from('{"a2a_listing_id":"lvl-x402-merchant-os"}'));
+      if (event === "end") cb();
+    },
+  };
+  const res = mockRes();
+  await handler(req, res);
+  const body = JSON.parse(res.body);
+  assert.equal(res.statusCode, 200);
+  assert.equal(calls, 1);
+  assert.equal(body.listing.price_id, "price_1UFmzKE9E4WCqx1QjoXF3BMO");
+  assert.equal(body.pack_download_url, "https://packs.example/paid?session_id=cs_live_456");
+  assert.match(capturedBody, /line_items%5B0%5D%5Bprice%5D=price_1UFmzKE9E4WCqx1QjoXF3BMO/);
+  assert.match(
+    capturedBody,
+    /success_url=https%3A%2F%2Fpacks.example%2Fpaid%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
+  );
+  assert.match(
+    capturedBody,
+    /cancel_url=https%3A%2F%2Fagentic.lvlltd.com%2Fbuy%3Fcheckout%3Dcancel/
+  );
+
+  process.env.CHECKOUT_SUCCESS_URL = "https://lvlltd.com/buy/success";
+  calls = 0;
+  const rejected = mockRes();
+  await handler(req, rejected);
+  global.fetch = originalFetch;
+  delete process.env.STRIPE_SECRET_KEY;
+  delete process.env.STRIPE_MODE;
+  delete process.env.CHECKOUT_SUCCESS_URL;
+  const rejectedBody = JSON.parse(rejected.body);
+  assert.equal(rejected.statusCode, 503);
+  assert.equal(rejectedBody.error, "invalid_checkout_success_url");
+  assert.equal(calls, 0);
 });
 
 test("test Stripe sessions are not forwarded", async () => {

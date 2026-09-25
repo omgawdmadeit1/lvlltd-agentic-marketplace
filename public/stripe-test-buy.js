@@ -2,6 +2,7 @@
   "use strict";
 
   var MODE_LABEL = "Stripe Checkout · $0.99 · mode=live";
+  var PACK_SUCCESS_URL = "https://lvlltd.com/buy/success";
 
   function $(id) {
     return document.getElementById(id);
@@ -58,6 +59,32 @@
     }
   }
 
+  function packDownloadHref(sessionId) {
+    if (!sessionId) return PACK_SUCCESS_URL;
+    return PACK_SUCCESS_URL + "?session_id=" + encodeURIComponent(sessionId);
+  }
+
+  function showPackDownload(href) {
+    var wrap = $("sf-download");
+    var link = $("sf-download-link");
+    if (!wrap || !link || !href) return;
+    link.href = href;
+    wrap.hidden = false;
+  }
+
+  function hidePackDownload() {
+    var wrap = $("sf-download");
+    if (wrap) wrap.hidden = true;
+  }
+
+  function httpsUrl(value) {
+    try {
+      return new URL(value).protocol === "https:" ? value : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
   async function showReturnedSession() {
     var params = new URLSearchParams(window.location.search);
     var state = params.get("checkout");
@@ -67,6 +94,7 @@
       return;
     }
     if (state !== "success") return;
+    showPackDownload(packDownloadHref(sessionId));
     if (!sessionId) {
       setStatus("Returned from Stripe Checkout. Confirm payment_status in the Stripe Dashboard — this page does not invent revenue.", "ok");
       return;
@@ -77,8 +105,12 @@
         return {};
       });
       if (payload.livemode === false || (payload.checkout && payload.checkout.livemode === false)) {
+        hidePackDownload();
         setStatus("Test session hidden. This storefront only reports LIVE Checkout.", "err");
         return;
+      }
+      if (httpsUrl(payload.pack_download_url)) {
+        showPackDownload(payload.pack_download_url);
       }
       if (!response.ok || !payload.ok) {
         setStatus(payload.message || "Returned from Checkout. Session lookup unavailable.", "warn");
