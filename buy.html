@@ -17,6 +17,7 @@ a{color:#c4b5fd}h1{margin:0 0 8px;font-size:1.5rem}.muted{color:var(--muted);fon
 .card h2{margin:0 0 6px;font-size:16px}button{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#f0abfc,#a78bfa 55%,#38bdf8);color:#120b1f;min-height:42px}
 button:disabled{opacity:.45;cursor:not-allowed}.badge{font-family:var(--mono);font-size:11px;color:var(--cyan)}
 .sf-status{margin:12px 0;font-size:13px}.sf-status.ok{color:var(--ok)}.sf-status.warn{color:var(--warn)}.sf-status.err{color:var(--err)}
+.sf-download{margin:12px 0}.sf-download a{display:inline-flex;align-items:center;border-radius:12px;padding:10px 14px;font-weight:700;text-decoration:none;background:linear-gradient(135deg,#f0abfc,#a78bfa 55%,#38bdf8);color:#120b1f}
 </style>
 </head>
 <body>
@@ -25,6 +26,7 @@ button:disabled{opacity:.45;cursor:not-allowed}.badge{font-family:var(--mono);fo
 <p class="muted">Stripe Checkout · $0.99. A created session is not a paid charge and is not reported revenue.</p>
 <div class="banner">mode=live · rail=a2a-marketplace · trigger=skillforge-agentic-buy</div>
 <p id="sf-status" class="sf-status" hidden></p>
+<p id="sf-download" class="sf-download" hidden><a id="sf-download-link" href="https://lvlltd.com/buy/success">Download your pack</a></p>
 <div class="grid">
   <article class="card">
     <h2>x402 Merchant OS</h2>
