@@ -9,6 +9,7 @@ const {
   resolveLiveSecretKey,
   stripeRequest,
 } = require("../lib/stripe-test-catalog");
+const { deliveryOrigin, checkoutSuccessUrl, successPageUrl } = require("../lib/delivery");
 
 function send(res, status, body) {
   const payload = JSON.stringify(body, null, 2);
@@ -128,16 +129,6 @@ function requestUrl(req) {
   return new URL(req.url || "/", `https://${host}`);
 }
 
-function publicOrigin(req) {
-  const proto = String(req.headers["x-forwarded-proto"] || "https")
-    .split(",")[0]
-    .trim();
-  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "agentic.lvlltd.com")
-    .split(",")[0]
-    .trim();
-  return `${proto}://${host}`;
-}
-
 function fail(extra) {
   return { ok: false, mode: "live", livemode: true, ...extra };
 }
@@ -216,15 +207,18 @@ function publicSession(session, listing) {
       mode: "live",
       metadata: session.metadata || (listing ? checkoutMetadata(listing) : null),
     },
+    // Order/download page on this storefront; it only shows the signed link once Stripe reports paid.
+    pack_download_url: successPageUrl(session.id),
   };
 }
 
-async function createCheckoutSession(req, listing) {
+async function createCheckoutSession(listing) {
   const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
     return { status: 503, body: fail(secret) };
   }
-  const origin = publicOrigin(req);
+  // Fixed public origin (DELIVERY_PUBLIC_ORIGIN, default https://agentic.lvlltd.com), never the Host header.
+  const origin = deliveryOrigin(process.env);
   const metadata = checkoutMetadata(listing);
   const { response, json } = await stripeRequest({
     key: secret.key,
@@ -234,7 +228,7 @@ async function createCheckoutSession(req, listing) {
       mode: "payment",
       client_reference_id: listing.a2a_listing_id,
       // Server-verified order page: shows the signed download link only once Stripe reports paid.
-      success_url: `${origin}/buy/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: checkoutSuccessUrl(process.env),
       cancel_url: `${origin}/buy?checkout=cancel&listing=${encodeURIComponent(listing.a2a_listing_id)}`,
       line_items: [{ price: listing.price_id, quantity: 1 }],
       metadata,
@@ -351,7 +345,7 @@ module.exports = async function handleStripeLiveCheckout(req, res) {
         send(res, 400, fail(resolved));
         return;
       }
-      const result = await createCheckoutSession(req, resolved.listing);
+      const result = await createCheckoutSession(resolved.listing);
       send(res, result.status, result.body);
       return;
     }

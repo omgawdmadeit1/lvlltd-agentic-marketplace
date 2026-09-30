@@ -19,6 +19,8 @@ const {
   verifyDownloadToken,
   isCheckoutSessionId,
   buildZip,
+  deliveryOrigin,
+  successPageUrl,
 } = require("../lib/delivery");
 const { packForSku, loadVerifiedPack } = require("../lib/delivery-packs");
 const { sendDeliveryEmail, escapeHtml } = require("../lib/delivery-email");
@@ -45,13 +47,6 @@ const PENDING_REASONS = new Set([
   "charge_missing",
   "charge_not_succeeded",
 ]);
-
-function deliveryOrigin(env) {
-  const raw = String((env || process.env).DELIVERY_PUBLIC_ORIGIN || "")
-    .trim()
-    .replace(/\/+$/, "");
-  return /^https?:\/\/[A-Za-z0-9.-]+(:\d+)?$/.test(raw) ? raw : "https://agentic.lvlltd.com";
-}
 
 function log(entry) {
   console.log(JSON.stringify({ at: "agentic_delivery", ...entry }));
@@ -139,7 +134,7 @@ async function deliverSession(sessionId, env) {
       to: decision.email,
       productName: listing ? listing.name : decision.sku,
       downloadUrl: link.url,
-      successUrl: `${origin}/buy/success?session_id=${encodeURIComponent(decision.sessionId)}`,
+      successUrl: successPageUrl(decision.sessionId, env),
       expiresAt: link.expiresAt,
     },
     env
