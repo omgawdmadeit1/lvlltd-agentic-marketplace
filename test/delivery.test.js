@@ -557,17 +557,17 @@ test("/buy/success shows the signed link only when Stripe reports paid", async (
 
 // ---------- pack hashing + zip ----------
 
-test("pack map pins both LIVE SKUs to sealed v2.1 packs at commit 40a49f1", () => {
-  assert.equal(PACK_SOURCE.commit, "40a49f117e543f11e53d9b106f74221edf9c3445");
+test("pack map pins both LIVE SKUs to sealed v2.1 packs at commit 6fde9af", () => {
+  assert.equal(PACK_SOURCE.commit, "6fde9afc5099d294bf797f42c7d5f13f97753734");
   assert.equal(DELIVERY_PACKS["lvl-x402-merchant-os"].pack_id, "x402-merchant-operating-system");
   assert.equal(
     DELIVERY_PACKS["lvl-x402-merchant-os"].content_sha256,
-    "3e1c3e1814a28f09190119b1b8ff1d34745cbdbc8cfdcfe2b7868678601f116d"
+    "60197af9ecfe04d42ca8b2ea9a6662c13fc40dd4b0bec131cd36864994bedf5a"
   );
   assert.equal(DELIVERY_PACKS["lvl-cold-start-catalog-bootstrapper"].pack_id, "cold-start-catalog-bootstrapper");
   assert.equal(
     DELIVERY_PACKS["lvl-cold-start-catalog-bootstrapper"].content_sha256,
-    "9f2780f01e977dff975d1f38f118c72f934514f91cd5ee6f7dd608bb9c523607"
+    "1c7dcd284b7f1f1e1d340fd189d9313500e2c1ea2a3cf45c50dc160cb25f4d5a"
   );
 });
 
