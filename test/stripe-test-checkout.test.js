@@ -360,3 +360,25 @@ test("existing market API still answers /api/health", async () => {
   assert.equal(res.statusCode, 200);
   assert.equal(body.ok, true);
 });
+
+const MERCHANT_OS_CARD_DESCRIPTION =
+  "Starter template (code scaffold + README) for planning an x402 storefront's catalog, proof and dispute work. It gives you a generic 5-step plan and checklist, nothing more: it doesn't automate or execute anything, and the playbook itself is yours to write.";
+const COLD_START_CARD_DESCRIPTION =
+  "Starter template (code scaffold + README) for planning a new marketplace storefront launch: a generic 5-step plan and checklist plus a short note on the canary-first idea. It doesn't create listings, tracking or KPI files, and it guarantees no sales.";
+
+test("product card descriptions are the honest starter-template copy everywhere /buy serves them", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const root = path.join(__dirname, "..");
+  const byId = Object.fromEntries(publicCatalog().listings.map((l) => [l.a2a_listing_id, l]));
+  assert.equal(byId["lvl-x402-merchant-os"].description, MERCHANT_OS_CARD_DESCRIPTION);
+  assert.equal(byId["lvl-cold-start-catalog-bootstrapper"].description, COLD_START_CARD_DESCRIPTION);
+  for (const file of ["buy.html", "public/buy.html"]) {
+    const html = fs.readFileSync(path.join(root, file), "utf8");
+    assert.ok(html.includes(MERCHANT_OS_CARD_DESCRIPTION), `${file}: x402 Merchant OS description`);
+    assert.ok(html.includes(COLD_START_CARD_DESCRIPTION), `${file}: Cold-Start description`);
+    assert.ok(!/operating playbook|bootstrap playbook/.test(html), `${file}: old playbook copy removed`);
+    assert.ok(html.includes("Buy $0.99"), `${file}: price unchanged`);
+  }
+  for (const l of Object.values(byId)) assert.equal(l.amount_usd, "0.99");
+});
