@@ -5,9 +5,6 @@ const {
   listingByPriceId,
   isRetiredTestPriceId,
   checkoutMetadata,
-  checkoutSuccessUrl,
-  packDownloadUrl,
-  CHECKOUT_CANCEL_URL,
   publicCatalog,
   resolveLiveSecretKey,
   stripeRequest,
@@ -27,19 +24,103 @@ function send(res, status, body) {
   res.end(payload);
 }
 
-function readBody(req) {
+const DEFAULT_ALLOWED_ORIGINS = Object.freeze(["https://agentic.lvlltd.com"]);
+const LISTING_ID_PATTERN = /^[a-z0-9-]{3,64}$/;
+const PRICE_ID_PATTERN = /^price_[A-Za-z0-9]{8,64}$/;
+const MAX_BODY_BYTES = 4096;
+
+/** Reads a JSON object body. Empty, oversized, non-JSON or non-object bodies are rejected. */
+function readJsonBody(req) {
   return new Promise((resolve) => {
     const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
+    let size = 0;
+    let tooLarge = false;
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) tooLarge = true;
+      else chunks.push(chunk);
+    });
     req.on("end", () => {
+      if (tooLarge) return resolve({ ok: false, error: "body_too_large" });
+      const text = Buffer.concat(chunks).toString().trim();
+      if (!text) return resolve({ ok: false, error: "body_required" });
       try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString() || "{}"));
+        const value = JSON.parse(text);
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+          return resolve({ ok: false, error: "body_not_object" });
+        }
+        return resolve({ ok: true, value });
       } catch {
-        resolve({});
+        return resolve({ ok: false, error: "invalid_json" });
       }
     });
-    req.on("error", () => resolve({}));
+    req.on("error", () => resolve({ ok: false, error: "body_unreadable" }));
   });
+}
+
+function toOrigin(value) {
+  try {
+    const url = new URL(String(value || "").trim());
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function allowedOrigins(env) {
+  const source = env || process.env;
+  const configured = String(source.CHECKOUT_ALLOWED_ORIGINS || "")
+    .split(",")
+    .map(toOrigin)
+    .filter(Boolean);
+  return configured.length ? configured : DEFAULT_ALLOWED_ORIGINS.slice();
+}
+
+// Local dev (scripts/local-storefront.js) only: never on Vercel or NODE_ENV=production.
+function isLocalDevOrigin(origin, env) {
+  const source = env || process.env;
+  if (source.VERCEL || source.NODE_ENV === "production") return false;
+  return /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+}
+
+/**
+ * Anti-spam gate for POST /api/checkout. Origin first, then Referer's origin.
+ * Header-less callers are rejected unless CHECKOUT_ALLOW_NO_ORIGIN=1.
+ * Note: headers are forgeable by non-browser clients; this blocks cross-site and naive bots.
+ */
+function checkRequestOrigin(req, env) {
+  const source = env || process.env;
+  const headers = req.headers || {};
+  const rawOrigin = headers.origin;
+  const rawReferer = headers.referer || headers.referrer;
+  let origin = null;
+  let via = null;
+  if (rawOrigin !== undefined && String(rawOrigin).trim() !== "") {
+    origin = toOrigin(rawOrigin);
+    via = "origin";
+  } else if (rawReferer !== undefined && String(rawReferer).trim() !== "") {
+    origin = toOrigin(rawReferer);
+    via = "referer";
+  }
+  if (!via) {
+    const optIn = ["1", "true"].includes(String(source.CHECKOUT_ALLOW_NO_ORIGIN || "").trim().toLowerCase());
+    return optIn
+      ? { ok: true, via: "no_origin_opt_in" }
+      : {
+          ok: false,
+          error: "origin_required",
+          message: "POST /api/checkout must come from https://agentic.lvlltd.com/buy.",
+        };
+  }
+  if (origin && (allowedOrigins(source).includes(origin) || isLocalDevOrigin(origin, source))) {
+    return { ok: true, via };
+  }
+  return {
+    ok: false,
+    error: "origin_not_allowed",
+    message: "POST /api/checkout must come from https://agentic.lvlltd.com/buy.",
+  };
 }
 
 function requestUrl(req) {
@@ -47,49 +128,64 @@ function requestUrl(req) {
   return new URL(req.url || "/", `https://${host}`);
 }
 
+function publicOrigin(req) {
+  const proto = String(req.headers["x-forwarded-proto"] || "https")
+    .split(",")[0]
+    .trim();
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "agentic.lvlltd.com")
+    .split(",")[0]
+    .trim();
+  return `${proto}://${host}`;
+}
+
 function fail(extra) {
   return { ok: false, mode: "live", livemode: true, ...extra };
 }
 
 function resolveListing(input) {
-  const listingId = String(input.a2a_listing_id || input.listing_id || input.skill || "").trim();
-  const priceId = String(input.price_id || "").trim();
-  if (priceId && isRetiredTestPriceId(priceId)) {
+  const body = input && typeof input === "object" && !Array.isArray(input) ? input : {};
+  const rawPrice = body.price_id;
+  if (rawPrice !== undefined && rawPrice !== null && rawPrice !== "") {
+    if (typeof rawPrice !== "string" || !PRICE_ID_PATTERN.test(rawPrice)) {
+      return { error: "invalid_price_id", message: "price_id must be a Stripe price id string." };
+    }
+    if (isRetiredTestPriceId(rawPrice)) {
+      return {
+        error: "test_price_id_rejected",
+        message: "Retired TEST price_ids are blocked. LIVE catalog only.",
+      };
+    }
+  }
+  const priceId = typeof rawPrice === "string" ? rawPrice : "";
+  const rawId = [body.a2a_listing_id, body.listing_id, body.skill].find(
+    (value) => value !== undefined && value !== null && value !== ""
+  );
+  if (rawId === undefined) {
     return {
-      error: "test_price_id_rejected",
-      message: "Retired TEST price_ids are blocked. LIVE catalog only.",
+      error: "listing_required",
+      message: "POST { a2a_listing_id } for lvl-x402-merchant-os or lvl-cold-start-catalog-bootstrapper.",
     };
   }
-  if (listingId) {
-    const listing = listingById(listingId);
-    if (!listing) {
-      return {
-        error: "listing_not_in_live_catalog",
-        message: "Unknown a2a_listing_id. LIVE catalog is two digital SKUs only.",
-      };
-    }
-    if (priceId && priceId !== listing.price_id) {
-      return {
-        error: "price_id_mismatch",
-        message: "price_id does not match the allowlisted LIVE price for this listing.",
-      };
-    }
-    return { listing };
+  if (typeof rawId !== "string" || !LISTING_ID_PATTERN.test(rawId)) {
+    return {
+      error: "invalid_listing_id",
+      message: "a2a_listing_id must match /^[a-z0-9-]{3,64}$/.",
+    };
   }
-  if (priceId) {
-    const listing = listingByPriceId(priceId);
-    if (!listing) {
-      return {
-        error: "price_id_not_in_live_catalog",
-        message: "price_id is not one of the LIVE ids.",
-      };
-    }
-    return { listing };
+  const listing = listingById(rawId);
+  if (!listing) {
+    return {
+      error: "listing_not_in_live_catalog",
+      message: "Unknown a2a_listing_id. LIVE catalog is two digital SKUs only.",
+    };
   }
-  return {
-    error: "listing_required",
-    message: "POST { a2a_listing_id } for lvl-x402-merchant-os or lvl-cold-start-catalog-bootstrapper.",
-  };
+  if (priceId && priceId !== listing.price_id) {
+    return {
+      error: "price_id_mismatch",
+      message: "price_id does not match the allowlisted LIVE price for this listing.",
+    };
+  }
+  return { listing };
 }
 
 function publicSession(session, listing) {
@@ -120,19 +216,15 @@ function publicSession(session, listing) {
       mode: "live",
       metadata: session.metadata || (listing ? checkoutMetadata(listing) : null),
     },
-    pack_download_url: packDownloadUrl(session.id),
   };
 }
 
-async function createCheckoutSession(listing) {
+async function createCheckoutSession(req, listing) {
   const secret = resolveLiveSecretKey(process.env);
   if (!secret.ok) {
     return { status: 503, body: fail(secret) };
   }
-  const success = checkoutSuccessUrl(process.env);
-  if (!success.ok) {
-    return { status: 503, body: fail(success) };
-  }
+  const origin = publicOrigin(req);
   const metadata = checkoutMetadata(listing);
   const { response, json } = await stripeRequest({
     key: secret.key,
@@ -141,11 +233,17 @@ async function createCheckoutSession(listing) {
     body: {
       mode: "payment",
       client_reference_id: listing.a2a_listing_id,
-      success_url: success.url,
-      cancel_url: CHECKOUT_CANCEL_URL,
+      // Server-verified order page: shows the signed download link only once Stripe reports paid.
+      success_url: `${origin}/buy/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/buy?checkout=cancel&listing=${encodeURIComponent(listing.a2a_listing_id)}`,
       line_items: [{ price: listing.price_id, quantity: 1 }],
       metadata,
       payment_intent_data: { metadata },
+      custom_text: {
+        submit: {
+          message: "After payment you get an instant download link on the next page and by email.",
+        },
+      },
     },
   });
   if (!response.ok || !json || !json.id) {
@@ -238,13 +336,22 @@ module.exports = async function handleStripeLiveCheckout(req, res) {
     }
 
     if (method === "POST" && (path === "/api/checkout" || path === "/api/stripe/checkout")) {
-      const body = await readBody(req);
-      const resolved = resolveListing(body);
+      const gate = checkRequestOrigin(req, process.env);
+      if (!gate.ok) {
+        send(res, 403, fail({ error: gate.error, message: gate.message }));
+        return;
+      }
+      const body = await readJsonBody(req);
+      if (!body.ok) {
+        send(res, 400, fail({ error: body.error, message: "POST a JSON object { a2a_listing_id }." }));
+        return;
+      }
+      const resolved = resolveListing(body.value);
       if (resolved.error) {
         send(res, 400, fail(resolved));
         return;
       }
-      const result = await createCheckoutSession(resolved.listing);
+      const result = await createCheckoutSession(req, resolved.listing);
       send(res, result.status, result.body);
       return;
     }
@@ -263,3 +370,6 @@ module.exports = async function handleStripeLiveCheckout(req, res) {
 
 module.exports.resolveListing = resolveListing;
 module.exports.publicSession = publicSession;
+module.exports.checkRequestOrigin = checkRequestOrigin;
+module.exports.allowedOrigins = allowedOrigins;
+module.exports.LISTING_ID_PATTERN = LISTING_ID_PATTERN;

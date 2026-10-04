@@ -58,6 +58,7 @@ test("checkout metadata is the required LIVE rail payload", () => {
   assert.deepEqual(checkoutMetadata(listing), {
     rail: "a2a-marketplace",
     a2a_listing_id: "lvl-x402-merchant-os",
+    sku: "lvl-x402-merchant-os",
     price_id: "price_1UFmzKE9E4WCqx1QjoXF3BMO",
     mode: "live",
     trigger: "skillforge-agentic-buy",
@@ -72,8 +73,9 @@ test("retired TEST price_ids are rejected", () => {
 });
 
 test("unknown listing ids are rejected", () => {
-  const resolved = resolveListing({ a2a_listing_id: "skill_sniper" });
-  assert.equal(resolved.error, "listing_not_in_live_catalog");
+  assert.equal(resolveListing({ a2a_listing_id: "lvl-unknown-pack" }).error, "listing_not_in_live_catalog");
+  // Underscore is outside the strict /^[a-z0-9-]{3,64}$/ pattern.
+  assert.equal(resolveListing({ a2a_listing_id: "skill_sniper" }).error, "invalid_listing_id");
 });
 
 test("price mismatch against allowlist is rejected", () => {
@@ -136,7 +138,7 @@ test("POST /api/checkout without a LIVE key stays 503 and leaks no secrets", asy
   const req = {
     method: "POST",
     url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com" },
+    headers: { host: "agentic.lvlltd.com", origin: "https://agentic.lvlltd.com" },
     on(event, cb) {
       if (event === "data") cb(Buffer.from('{"a2a_listing_id":"lvl-x402-merchant-os"}'));
       if (event === "end") cb();
@@ -206,7 +208,11 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   const req = {
     method: "POST",
     url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com", "x-forwarded-proto": "https" },
+    headers: {
+      host: "agentic.lvlltd.com",
+      "x-forwarded-proto": "https",
+      origin: "https://agentic.lvlltd.com",
+    },
     on(event, cb) {
       if (event === "data") {
         cb(Buffer.from('{"a2a_listing_id":"lvl-cold-start-catalog-bootstrapper"}'));
@@ -228,11 +234,11 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   assert.equal(body.checkout.metadata.trigger, "skillforge-agentic-buy");
   assert.equal(body.checkout.metadata.mode, "live");
   assert.equal(body.listing.amount_label, "$0.99");
-  assert.equal(body.pack_download_url, "https://lvlltd.com/buy/success?session_id=cs_live_123");
   assert.equal(captured.url, "https://api.stripe.com/v1/checkout/sessions");
   const form = captured.init.body;
   assert.match(form, /metadata%5Brail%5D=a2a-marketplace/);
   assert.match(form, /metadata%5Ba2a_listing_id%5D=lvl-cold-start-catalog-bootstrapper/);
+  assert.match(form, /metadata%5Bsku%5D=lvl-cold-start-catalog-bootstrapper/);
   assert.match(form, /metadata%5Bprice_id%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
   assert.match(form, /metadata%5Bmode%5D=live/);
   assert.match(form, /metadata%5Btrigger%5D=skillforge-agentic-buy/);
@@ -240,79 +246,9 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   assert.match(form, /line_items%5B0%5D%5Bprice%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
   assert.match(
     form,
-    /success_url=https%3A%2F%2Flvlltd.com%2Fbuy%2Fsuccess%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
+    /success_url=https%3A%2F%2Fagentic\.lvlltd\.com%2Fbuy%2Fsuccess%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
   );
-  assert.match(
-    form,
-    /cancel_url=https%3A%2F%2Fagentic.lvlltd.com%2Fbuy%3Fcheckout%3Dcancel/
-  );
-  assert.doesNotMatch(form, /checkout%3Dsuccess/);
   assert.doesNotMatch(form, /payment_method_types/);
-});
-
-test("POST /api/checkout honors CHECKOUT_SUCCESS_URL and refuses a bad one", async () => {
-  process.env.STRIPE_SECRET_KEY = "sk_live_dummy";
-  process.env.STRIPE_MODE = "live";
-  process.env.CHECKOUT_SUCCESS_URL = "https://packs.example/paid?session_id={CHECKOUT_SESSION_ID}";
-  const originalFetch = global.fetch;
-  let calls = 0;
-  let capturedBody = "";
-  global.fetch = async (_url, init) => {
-    calls += 1;
-    capturedBody = init && init.body ? init.body : "";
-    return {
-      ok: true,
-      status: 200,
-      json: async () => ({
-        id: "cs_live_456",
-        url: "https://checkout.stripe.com/c/pay/cs_live_456",
-        livemode: true,
-        status: "open",
-        payment_status: "unpaid",
-        amount_total: 99,
-        currency: "usd",
-      }),
-    };
-  };
-  const handler = require("../api/index");
-  const req = {
-    method: "POST",
-    url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com", "x-forwarded-proto": "https" },
-    on(event, cb) {
-      if (event === "data") cb(Buffer.from('{"a2a_listing_id":"lvl-x402-merchant-os"}'));
-      if (event === "end") cb();
-    },
-  };
-  const res = mockRes();
-  await handler(req, res);
-  const body = JSON.parse(res.body);
-  assert.equal(res.statusCode, 200);
-  assert.equal(calls, 1);
-  assert.equal(body.listing.price_id, "price_1UFmzKE9E4WCqx1QjoXF3BMO");
-  assert.equal(body.pack_download_url, "https://packs.example/paid?session_id=cs_live_456");
-  assert.match(capturedBody, /line_items%5B0%5D%5Bprice%5D=price_1UFmzKE9E4WCqx1QjoXF3BMO/);
-  assert.match(
-    capturedBody,
-    /success_url=https%3A%2F%2Fpacks.example%2Fpaid%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
-  );
-  assert.match(
-    capturedBody,
-    /cancel_url=https%3A%2F%2Fagentic.lvlltd.com%2Fbuy%3Fcheckout%3Dcancel/
-  );
-
-  process.env.CHECKOUT_SUCCESS_URL = "https://lvlltd.com/buy/success";
-  calls = 0;
-  const rejected = mockRes();
-  await handler(req, rejected);
-  global.fetch = originalFetch;
-  delete process.env.STRIPE_SECRET_KEY;
-  delete process.env.STRIPE_MODE;
-  delete process.env.CHECKOUT_SUCCESS_URL;
-  const rejectedBody = JSON.parse(rejected.body);
-  assert.equal(rejected.statusCode, 503);
-  assert.equal(rejectedBody.error, "invalid_checkout_success_url");
-  assert.equal(calls, 0);
 });
 
 test("test Stripe sessions are not forwarded", async () => {
@@ -332,7 +268,7 @@ test("test Stripe sessions are not forwarded", async () => {
   const req = {
     method: "POST",
     url: "/api/checkout",
-    headers: { host: "agentic.lvlltd.com" },
+    headers: { host: "agentic.lvlltd.com", origin: "https://agentic.lvlltd.com" },
     on(event, cb) {
       if (event === "data") cb(Buffer.from('{"a2a_listing_id":"lvl-x402-merchant-os"}'));
       if (event === "end") cb();
