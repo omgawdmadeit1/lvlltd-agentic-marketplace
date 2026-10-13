@@ -25,7 +25,7 @@ function sendFile(res, filePath) {
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://127.0.0.1:${PORT}`);
-  if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
+  if (url.pathname === "/api" || url.pathname.startsWith("/api/") || url.pathname === "/buy/success") {
     handler(req, res);
     return;
   }
