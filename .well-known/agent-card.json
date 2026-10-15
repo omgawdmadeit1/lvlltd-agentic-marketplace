@@ -5,5 +5,5 @@
   "proof": "https://lvlltd.com/api/proof",
   "x402_on_this_host": "stub",
   "note": "POST /api/payments/x402/confirm does not settle and does not unlock. USDC challenges are on lvlltd.com. payTo is 0x8E51309870394f79574452A52A3c916622f0c4d1 on Base. Never pay 0xa008.",
-  "music_download": "https://music.lvlltd.com/api/pay?track=<id>"
+  "music_download": "Do not pay https://music.lvlltd.com/api/pay. The live download 402 still names retired receiver 0xa00876513baa433ce2b58a5341fd06d2b6f9a6ed. Streams are free. Skill settlement is https://lvlltd.com/api/pay."
 }

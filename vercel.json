@@ -8,6 +8,14 @@
       "destination": "https://cdn.jsdelivr.net/gh/omgawdmadeit1/lvlltd-agentic-marketplace@136f07d/media/$1"
     },
     {
+      "source": "/.well-known/agent-card.json",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/agent-card.json",
+      "destination": "/api/index"
+    },
+    {
       "source": "/buy/success",
       "destination": "/api/index"
     },
