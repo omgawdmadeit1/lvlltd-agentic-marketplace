@@ -1,0 +1,201 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LVL agentic storefront: commerce",
+    "version": "1.0.0",
+    "description": "Checkout for the two $0.99 packs sold on agentic.lvlltd.com. Checkout operations run on lvlltd.com (same lvl X, Inc. Stripe account). The demo market API on this host is described at /api/openapi.json; its x402 rail is a stub and does not settle."
+  },
+  "servers": [
+    {
+      "url": "https://agentic.lvlltd.com"
+    }
+  ],
+  "x-service-info": {
+    "categories": [
+      "commerce",
+      "ai-agents"
+    ],
+    "docs": {
+      "homepage": "https://agentic.lvlltd.com/",
+      "llms": "https://agentic.lvlltd.com/llms.txt",
+      "apiReference": "https://agentic.lvlltd.com/api/openapi.json"
+    }
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Health of this host",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/acp/checkout_sessions": {
+      "post": {
+        "operationId": "acpCreateCheckoutSession",
+        "summary": "ACP: create a Stripe checkout session for one pack",
+        "servers": [
+          {
+            "url": "https://lvlltd.com",
+            "description": "Merchant API on lvlltd.com (lvl X, Inc.)"
+          }
+        ],
+        "x-payment-info": {
+          "intent": "charge",
+          "method": "stripe",
+          "amount": "99",
+          "currency": "usd",
+          "description": "$0.99 (99 usd cents) per session, one item: lvl-x402-merchant-os or lvl-cold-start-catalog-bootstrapper. Paid on Stripe's hosted page via continue_url.",
+          "x-offers-by-item": [
+            {
+              "intent": "charge",
+              "method": "stripe",
+              "amount": "99",
+              "currency": "usd",
+              "description": "x402 Merchant OS (Stripe price price_1UNxBCE6xjYB5uvsmemgsfK1; Payment Link https://buy.stripe.com/cNi9ATgaZ5UW4CD6mtgUM0b)"
+            },
+            {
+              "intent": "charge",
+              "method": "stripe",
+              "amount": "99",
+              "currency": "usd",
+              "description": "Cold-Start Catalog Bootstrapper (Stripe price price_1UNxBEE6xjYB5uvs6xidpkCA; Payment Link https://buy.stripe.com/eVq7sL2k9fvw8ST8uBgUM0c)"
+            }
+          ]
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "items"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "maxItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "enum": [
+                            "lvl-x402-merchant-os",
+                            "lvl-cold-start-catalog-bootstrapper"
+                          ]
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "const": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Checkout session created; pay at continue_url"
+          },
+          "400": {
+            "description": "Invalid item"
+          }
+        }
+      }
+    },
+    "/api/ucp/checkout-sessions": {
+      "post": {
+        "operationId": "ucpCreateCheckoutSession",
+        "summary": "UCP: create a Stripe checkout session for one pack",
+        "servers": [
+          {
+            "url": "https://lvlltd.com",
+            "description": "Merchant API on lvlltd.com (lvl X, Inc.)"
+          }
+        ],
+        "x-payment-info": {
+          "intent": "charge",
+          "method": "stripe",
+          "amount": "99",
+          "currency": "usd",
+          "description": "$0.99 (99 usd cents) per session, one item: lvl-x402-merchant-os or lvl-cold-start-catalog-bootstrapper. Paid on Stripe's hosted page via continue_url.",
+          "x-offers-by-item": [
+            {
+              "intent": "charge",
+              "method": "stripe",
+              "amount": "99",
+              "currency": "usd",
+              "description": "x402 Merchant OS (Stripe price price_1UNxBCE6xjYB5uvsmemgsfK1; Payment Link https://buy.stripe.com/cNi9ATgaZ5UW4CD6mtgUM0b)"
+            },
+            {
+              "intent": "charge",
+              "method": "stripe",
+              "amount": "99",
+              "currency": "usd",
+              "description": "Cold-Start Catalog Bootstrapper (Stripe price price_1UNxBEE6xjYB5uvs6xidpkCA; Payment Link https://buy.stripe.com/eVq7sL2k9fvw8ST8uBgUM0c)"
+            }
+          ]
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "line_items"
+                ],
+                "properties": {
+                  "line_items": {
+                    "type": "array",
+                    "maxItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "item": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "enum": [
+                                "lvl-x402-merchant-os",
+                                "lvl-cold-start-catalog-bootstrapper"
+                              ]
+                            }
+                          }
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "const": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Checkout session created; pay at continue_url"
+          },
+          "400": {
+            "description": "Invalid item"
+          }
+        }
+      }
+    }
+  }
+}

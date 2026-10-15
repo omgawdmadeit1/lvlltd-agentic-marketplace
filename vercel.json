@@ -116,6 +116,24 @@
           "value": "application/linkset+json"
         }
       ]
+    },
+    {
+      "source": "/.well-known/ucp",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/openapi.json",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
     }
   ]
 }
