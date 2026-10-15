@@ -1,0 +1,26 @@
+{
+  "protocol": {
+    "name": "acp",
+    "version": "2026-04-17",
+    "supported_versions": [
+      "2026-04-17"
+    ],
+    "documentation_url": "https://agentic.lvlltd.com/llms.txt"
+  },
+  "api_base_url": "https://lvlltd.com/api/acp",
+  "transports": [
+    "rest"
+  ],
+  "capabilities": {
+    "services": [
+      "checkout"
+    ],
+    "supported_currencies": [
+      "usd"
+    ],
+    "supported_locales": [
+      "en-US"
+    ]
+  },
+  "notes": "Merchant API is hosted on lvlltd.com (same lvl X, Inc. Stripe account). Both packs sold on agentic.lvlltd.com, lvl-x402-merchant-os and lvl-cold-start-catalog-bootstrapper, are $0.99 one-time Stripe prices. The buyer completes payment on Stripe's hosted page (continue_url); delegated payment / Shared Payment Tokens are not supported. This host's own x402 rail is a stub and does not settle."
+}

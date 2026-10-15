@@ -1,0 +1,38 @@
+{
+  "protocol_version": "2026-08-25",
+  "services": [
+    "dev.ucp.shopping"
+  ],
+  "capabilities": [
+    "dev.ucp.shopping.checkout"
+  ],
+  "endpoints": {
+    "rest": "https://lvlltd.com/api/ucp",
+    "checkout_sessions": "https://lvlltd.com/api/ucp/checkout-sessions"
+  },
+  "ucp": {
+    "version": "2026-08-25",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-08-25",
+          "spec": "https://ucp.dev/2026-08-25/specification/overview/",
+          "transport": "rest",
+          "endpoint": "https://lvlltd.com/api/ucp",
+          "schema": "https://ucp.dev/2026-08-25/services/shopping/rest.openapi.json"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-08-25",
+          "spec": "https://ucp.dev/2026-08-25/specification/shopping/checkout/",
+          "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  },
+  "notes": "Merchant API is hosted on lvlltd.com (same lvl X, Inc. Stripe account). Both packs sold on agentic.lvlltd.com, lvl-x402-merchant-os and lvl-cold-start-catalog-bootstrapper, are $0.99 one-time Stripe prices. The buyer completes payment on Stripe's hosted page (continue_url); delegated payment / Shared Payment Tokens are not supported. This host's own x402 rail is a stub and does not settle."
+}
