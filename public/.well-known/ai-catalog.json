@@ -1,0 +1,31 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "LVL agentic storefront (lvl X, Inc.)",
+    "identifier": "https://agentic.lvlltd.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:agentic.lvlltd.com:skills:index",
+      "displayName": "agentic.lvlltd.com agent skills index",
+      "type": "application/agent-skills-index+json",
+      "url": "https://agentic.lvlltd.com/.well-known/agent-skills/index.json",
+      "representativeQueries": [
+        "buy an LVL skill pack with a card",
+        "what does agentic.lvlltd.com sell"
+      ]
+    },
+    {
+      "identifier": "urn:air:agentic.lvlltd.com:api:openapi",
+      "displayName": "agentic.lvlltd.com demo market API (OpenAPI 3.1)",
+      "type": "application/openapi+json",
+      "url": "https://agentic.lvlltd.com/api/openapi.json"
+    },
+    {
+      "identifier": "urn:air:agentic.lvlltd.com:mcp:lvlltd",
+      "displayName": "LVL skill market MCP server (hosted on lvlltd.com)",
+      "type": "application/mcp-server-card+json",
+      "url": "https://lvlltd.com/.well-known/mcp/server-card.json"
+    }
+  ]
+}

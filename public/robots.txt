@@ -1,0 +1,22 @@
+# LVL agentic storefront (lvl X, Inc.) — https://agentic.lvlltd.com
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+
+# AI crawlers: same access as everyone else
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+
+Sitemap: https://agentic.lvlltd.com/sitemap.xml
+Agentmap: https://agentic.lvlltd.com/.well-known/ai-catalog.json

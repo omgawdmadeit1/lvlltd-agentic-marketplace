@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "lvl-agentic-storefront",
+      "type": "skill-md",
+      "description": "Find and buy the two $0.99 LVL skill packs on agentic.lvlltd.com and use its demo market API.",
+      "url": "/.well-known/agent-skills/lvl-agentic-storefront/SKILL.md",
+      "digest": "sha256:0435434238c5e687353668d9f119daedba33d82003ae42ab9f6d051c9548916e"
+    }
+  ]
+}
