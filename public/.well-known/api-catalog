@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://agentic.lvlltd.com/api/",
+      "service-desc": [
+        {
+          "href": "https://agentic.lvlltd.com/api/openapi.json",
+          "type": "application/openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://agentic.lvlltd.com/llms.txt",
+          "type": "text/plain"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://agentic.lvlltd.com/api/health",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

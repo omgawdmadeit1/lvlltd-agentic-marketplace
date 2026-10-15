@@ -1,0 +1,18 @@
+# LVL agentic storefront
+
+> agentic.lvlltd.com: a chat-style storefront for humans plus a JSON demo market API for agents. Two digital skill packs are sold for $0.99 by card (Stripe Payment Links). Wallet (x402, USDC on Base) purchases settle on lvlltd.com, not on this host.
+
+## Pages
+- [Home](https://agentic.lvlltd.com/index.md): chat storefront, card-first $0.99 packs
+- [Buy](https://agentic.lvlltd.com/buy.md): the two $0.99 packs with card and wallet options
+
+## API (this host)
+- [Agent entry](https://agentic.lvlltd.com/api/agent): JSON description and next actions
+- [OpenAPI](https://agentic.lvlltd.com/api/openapi.json): OpenAPI 3.1 for /api/*
+- [Health](https://agentic.lvlltd.com/api/health)
+- Note: the auctions/listings/balance on this API are an in-memory demo. The x402 rail here is a stub; POST /api/payments/x402/confirm does not settle.
+
+## Real settlement and agent services (lvlltd.com)
+- [x402 pay](https://lvlltd.com/api/pay)
+- [MCP server card](https://lvlltd.com/.well-known/mcp/server-card.json)
+- [Skill market](https://lvlltd.com/)
