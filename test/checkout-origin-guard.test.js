@@ -184,7 +184,7 @@ test("malformed, unknown, missing ids and empty/invalid bodies are 400 with no S
     [JSON.stringify({ a2a_listing_id: "a".repeat(65) }), "invalid_listing_id"],
     ['{"a2a_listing_id":"../etc/passwd"}', "invalid_listing_id"],
     ['{"a2a_listing_id":"lvl-unknown-pack"}', "listing_not_in_live_catalog"],
-    ['{"price_id":"price_1UFmzKE9E4WCqx1QjoXF3BMO"}', "listing_required"],
+    ['{"price_id":"price_1US1DqE6xjYB5uvs6fpqOafa"}', "listing_required"],
     ['{"a2a_listing_id":"lvl-x402-merchant-os","price_id":{"$ne":1}}', "invalid_price_id"],
     [JSON.stringify({ a2a_listing_id: "lvl-x402-merchant-os", pad: "x".repeat(5000) }), "body_too_large"],
   ];

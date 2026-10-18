@@ -122,11 +122,11 @@ function paidSession(parts) {
       rail: "a2a-marketplace",
       a2a_listing_id: "lvl-x402-merchant-os",
       sku: "lvl-x402-merchant-os",
-      price_id: "price_1UFmzKE9E4WCqx1QjoXF3BMO",
+      price_id: "price_1US1DqE6xjYB5uvs6fpqOafa",
       mode: "live",
       trigger: "skillforge-agentic-buy",
     },
-    line_items: { object: "list", data: [{ price: { id: "price_1UFmzKE9E4WCqx1QjoXF3BMO" } }] },
+    line_items: { object: "list", data: [{ price: { id: "price_1US1DqE6xjYB5uvs6fpqOafa" } }] },
     payment_intent: paymentIntent,
     ...(p.session || {}),
   };
@@ -319,7 +319,7 @@ test("deliverability: only a paid, unrefunded, undisputed LIVE session delivers"
     [paidSession({ charge: { paid: false, status: "failed" } }), "charge_not_succeeded"],
     [
       paidSession({
-        session: { line_items: { data: [{ price: { id: "price_1UFmzME9E4WCqx1QkzHC4R5h" } }] } },
+        session: { line_items: { data: [{ price: { id: "price_1US1DrE6xjYB5uvsxbgITfC1" } }] } },
       }),
       "sku_not_deliverable",
     ],
