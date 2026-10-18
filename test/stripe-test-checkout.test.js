@@ -42,7 +42,7 @@ test("catalog exposes only the two LIVE price_ids", () => {
   );
   assert.deepEqual(
     catalog.listings.map((item) => item.price_id),
-    ["price_1UFmzKE9E4WCqx1QjoXF3BMO", "price_1UFmzME9E4WCqx1QkzHC4R5h"]
+    ["price_1US1DqE6xjYB5uvs6fpqOafa", "price_1US1DrE6xjYB5uvsxbgITfC1"]
   );
   for (const listing of catalog.listings) {
     assert.equal(listing.amount_label, "$0.99");
@@ -59,7 +59,7 @@ test("checkout metadata is the required LIVE rail payload", () => {
     rail: "a2a-marketplace",
     a2a_listing_id: "lvl-x402-merchant-os",
     sku: "lvl-x402-merchant-os",
-    price_id: "price_1UFmzKE9E4WCqx1QjoXF3BMO",
+    price_id: "price_1US1DqE6xjYB5uvs6fpqOafa",
     mode: "live",
     trigger: "skillforge-agentic-buy",
   });
@@ -81,7 +81,7 @@ test("unknown listing ids are rejected", () => {
 test("price mismatch against allowlist is rejected", () => {
   const resolved = resolveListing({
     a2a_listing_id: "lvl-x402-merchant-os",
-    price_id: "price_1UFmzME9E4WCqx1QkzHC4R5h",
+    price_id: "price_1US1DrE6xjYB5uvsxbgITfC1",
   });
   assert.equal(resolved.error, "price_id_mismatch");
 });
@@ -108,7 +108,7 @@ test("form encoder nests Stripe metadata fields", () => {
   });
   assert.match(encoded, /mode=payment/);
   assert.match(encoded, /metadata%5Brail%5D=a2a-marketplace/);
-  assert.match(encoded, /line_items%5B0%5D%5Bprice%5D=price_1UFmzKE9E4WCqx1QjoXF3BMO/);
+  assert.match(encoded, /line_items%5B0%5D%5Bprice%5D=price_1US1DqE6xjYB5uvs6fpqOafa/);
 });
 
 test("GET /api/checkout returns LIVE catalog and does not invent revenue", async () => {
@@ -197,7 +197,7 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
         metadata: {
           rail: "a2a-marketplace",
           a2a_listing_id: "lvl-cold-start-catalog-bootstrapper",
-          price_id: "price_1UFmzME9E4WCqx1QkzHC4R5h",
+          price_id: "price_1US1DrE6xjYB5uvsxbgITfC1",
           mode: "live",
           trigger: "skillforge-agentic-buy",
         },
@@ -239,11 +239,11 @@ test("POST /api/checkout creates a LIVE session with required metadata", async (
   assert.match(form, /metadata%5Brail%5D=a2a-marketplace/);
   assert.match(form, /metadata%5Ba2a_listing_id%5D=lvl-cold-start-catalog-bootstrapper/);
   assert.match(form, /metadata%5Bsku%5D=lvl-cold-start-catalog-bootstrapper/);
-  assert.match(form, /metadata%5Bprice_id%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
+  assert.match(form, /metadata%5Bprice_id%5D=price_1US1DrE6xjYB5uvsxbgITfC1/);
   assert.match(form, /metadata%5Bmode%5D=live/);
   assert.match(form, /metadata%5Btrigger%5D=skillforge-agentic-buy/);
   assert.match(form, /payment_intent_data%5Bmetadata%5D%5Brail%5D=a2a-marketplace/);
-  assert.match(form, /line_items%5B0%5D%5Bprice%5D=price_1UFmzME9E4WCqx1QkzHC4R5h/);
+  assert.match(form, /line_items%5B0%5D%5Bprice%5D=price_1US1DrE6xjYB5uvsxbgITfC1/);
   assert.match(
     form,
     /success_url=https%3A%2F%2Fagentic\.lvlltd\.com%2Fbuy%2Fsuccess%3Fsession_id%3D%7BCHECKOUT_SESSION_ID%7D/
