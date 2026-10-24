@@ -22,6 +22,7 @@ const {
 } = require("../lib/delivery");
 const { packForSku, loadVerifiedPack } = require("../lib/delivery-packs");
 const { sendDeliveryEmail, escapeHtml } = require("../lib/delivery-email");
+const customerio = require("../lib/customerio");
 
 const DELIVERY_EVENTS = new Set([
   "checkout.session.completed",
@@ -144,6 +145,20 @@ async function deliverSession(sessionId, env) {
     },
     env
   );
+  if (email.ok) {
+    // Non-blocking Customer.io event; skipped when CUSTOMERIO_* env is unset.
+    customerio.track(
+      decision.email,
+      "purchase_completed",
+      {
+        product_name: listing ? listing.name : decision.sku,
+        access_url: link.url,
+        price: (loaded.session.amount_total || 0) / 100,
+        platform: "lvl",
+      },
+      { id: loaded.session.id || decision.sessionId, env }
+    );
+  }
   if (email.ok && decision.paymentIntentId) {
     // Best-effort idempotency marker so Stripe retries don't email twice.
     try {
